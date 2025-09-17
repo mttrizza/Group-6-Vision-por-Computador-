@@ -1,7 +1,7 @@
 # Group-6-Vision-por-Computador-
 Hola, somos Mattia Rizza y Riccardo Belletti y estudiamos el curso de Visión por Computador en la Universidad de Las Palmas de Gran Canaria.
 
-Buenos días, este es el ejercicio de Mattia Rizza y Riccardo Giannelli. Para realizar estos ejercicios nos hemos confrontado mucho a distancia, intercambiando fotos, videos e incluso el código; ambos hemos trabajado en todos los ejercicios para aprender a entender bien cómo funcionaban.
+Buenos días, este es el ejercicio de Mattia Rizza y Riccardo Belletti. Para realizar estos ejercicios nos hemos confrontado mucho a distancia, intercambiando fotos, videos e incluso el código; ambos hemos trabajado en todos los ejercicios para aprender a entender bien cómo funcionaban.
 
 También nos hemos apoyado en ChatGPT para intentar descubrir fragmentos de código nuevos, primero para comprenderlos y estudiarlos, y luego para insertarlos en nuestros ejercicios.
 Hemos consultado también la página https://docs.opencv.org/4.x/index.html

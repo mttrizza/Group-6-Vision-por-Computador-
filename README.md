@@ -1,5 +1,5 @@
 # Group-6-Vision-por-Computador-
-Hola, somos Mattia Rizza y Riccardo Giannelli y estudiamos el curso de Visión por Computador en la Universidad de Las Palmas de Gran Canaria.
+Hola, somos Mattia Rizza y Riccardo Belletti y estudiamos el curso de Visión por Computador en la Universidad de Las Palmas de Gran Canaria.
 
 Buenos días, este es el ejercicio de Mattia Rizza y Riccardo Giannelli. Para realizar estos ejercicios nos hemos confrontado mucho a distancia, intercambiando fotos, videos e incluso el código; ambos hemos trabajado en todos los ejercicios para aprender a entender bien cómo funcionaban.
 

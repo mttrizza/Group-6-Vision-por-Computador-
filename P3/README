@@ -1,1 +1,42 @@
+Buenos días, este es el ejercicio de Mattia Rizza y Riccardo Belletti (GRUPO 6). 
+Para realizar estos ejercicios nos hemos confrontado mucho a distancia, intercambiando fotos, videos e incluso el código; 
+ambos hemos trabajado en todos los ejercicios para aprender a entender bien cómo funcionaban. 
+En este caso también nos vimos en persona para hacer algunas pruebas con distintas imágenes y comprobar cómo respondía el programa.
 
+Para este primer ejercicio, inicialmente intentamos seguir el método propuesto en la consigna,que consistía en seleccionar manualmente 
+una moneda para establecer la escala. 
+Sin embargo, tuvimos varios problemas que no nos permitían identificar las monedas correctamente. Como no conseguimos resolver estos 
+fallos de una forma fiable, decidimos cambiar de método y optar por una solución más automática que estima la escala directamente a 
+partir de todas las monedas detectadas en la imagen.
+
+El programa carga la imagen Monedas.jpg, detecta los círculos correspondientes a las monedas mediante la transformada de Hough y estima su 
+tamaño real comparando los radios detectados (en píxeles) con los diámetros reales de cada tipo de moneda en milímetros. 
+Con esta información calcula el tamaño estimado de cada círculo y lo compara con los valores teóricos, identificando así a qué tipo de 
+moneda corresponde (por ejemplo, 1€, 50c, 20c, etc.).
+
+Después de la detección, el programa dibuja los contornos de las monedas sobre la imagen y permite al usuario hacer clic sobre ellas. 
+Al hacer clic, la moneda seleccionada se resalta en rojo y se añade su valor al total mostrado en la parte superior. De esta manera, 
+el usuario puede interactuar directamente con la imagen y comprobar visualmente el resultado del conteo y la suma del dinero.
+
+Una vez verificado el funcionamiento con la imagen principal, probamos el código con otras tres imágenes. 
+Con Monedas2.jpg los resultados fueron casi correctos, aunque una moneda de un euro fue confundida con una de veinte céntimos.
+En Monedas3.jpg el programa no detectó círculos, y en Monedas4.png identificó mal la mayoría de las monedas. 
+Creemos que estos problemas se deben principalmente a las diferencias de iluminación, tamaño y solapamiento entre monedas. 
+Para mejorar los resultados sería útil ajustar los parámetros de detección y aplicar algún filtro de contraste o segmentación antes de usar Hough.
+
+Para este segundo ejercicio, lo primero que hace nuestro código es cargar la imagen de test y el archivo CSV 
+que nos dice dónde está cada partícula y de qué tipo es. Usando esas coordenadas, 
+el programa va recortando cada partícula de la imagen grande para analizarla una por una.
+
+Para cada trocito de imagen, necesitábamos separar la partícula del fondo. Usamos un método automático llamado umbral de Otsu. 
+Una vez que teníamos la partícula aislada, calculamos 7 características geométricas para describirla: su área, el perímetro, 
+cómo de redonda es (la compacidad), y otras relaciones sobre su tamaño y forma. 
+La idea es que estas 7 medidas funcionen como una "firma" para cada partícula, que nos permita diferenciar entre fibras, fragmentos y pellets.
+
+Después de calcular estas "firmas" para todas las partículas de la imagen, pasamos a la parte de "aprendizaje". 
+Lo que hicimos fue calcular el perfil medio para cada clase. Esto nos da un punto de referencia, un "centroide", 
+que representa a la partícula típica de cada categoría. Para clasificar una partícula, el proceso es simple: 
+medimos la distancia euclídea de sus características a los tres centroides y la asignamos a la clase que esté más cerca.
+
+Al final, para evaluar si nuestro método funcionaba, creamos una matriz de confusión. Es un gráfico que muestra de forma muy visual cuántas 
+partículas hemos clasificado bien y en qué casos nos hemos equivocado. También calculamos la accuracy para tener una idea general del rendimiento.

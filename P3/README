@@ -18,9 +18,9 @@ Después de la detección, el programa dibuja los contornos de las monedas sobre
 Al hacer clic, la moneda seleccionada se resalta en rojo y se añade su valor al total mostrado en la parte superior. De esta manera, 
 el usuario puede interactuar directamente con la imagen y comprobar visualmente el resultado del conteo y la suma del dinero.
 
-Una vez verificado el funcionamiento con la imagen principal, probamos el código con otras tres imágenes. 
+Una vez verificado el funcionamiento con la imagen principal, probamos el código con otras dos imágenes. 
 Con Monedas2.jpg los resultados fueron casi correctos, aunque una moneda de un euro fue confundida con una de veinte céntimos.
-En Monedas3.jpg el programa no detectó círculos, y en Monedas4.png identificó mal la mayoría de las monedas. 
+En Monedas3.jpg el programa no detectó círculos. 
 Creemos que estos problemas se deben principalmente a las diferencias de iluminación, tamaño y solapamiento entre monedas. 
 Para mejorar los resultados sería útil ajustar los parámetros de detección y aplicar algún filtro de contraste o segmentación antes de usar Hough.
 

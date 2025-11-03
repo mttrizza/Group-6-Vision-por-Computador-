@@ -51,7 +51,7 @@ ci creerà automaticamente la struttura di cartelle richiesta e sposterà casual
 
 
 Quando lo script ha terminato, troveremo una cartella con le varie suddivisioni 
-<img src="image/luz.png" width="300" />
+<img src="image/labels.png" width="300" />
 
 Successivamente abbiamo installato Ultralytics che è la libreria python che utilizzeremo per addestrare il modello YOLO 
 Terminata l’installazione abbiamo dovuto creare un file di configurazione dell’addestramento, questo file imposta la posizione delle cartelle di Addestramento e Convalida e definisce le classe dei modelli utilizzando questo codice datosi dal creatore del sito

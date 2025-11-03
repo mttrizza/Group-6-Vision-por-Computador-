@@ -129,7 +129,8 @@ Iniciamos el entrenamiento.
 Una vez finalizado, comprimí y descargué el modelo y lo renombré como *my_model.pt*.
 
 Cierro todo, vuelvo a abrir el terminal de Anaconda, entro en **yolo-env1**, luego entro en la carpeta donde coloqué mi archivo *my_model.pt* y también aquí instalo **ultralytics**.
-Después, con el código Python ejecutamos nuestro modelo utilizando el video propuesto por usted, profe, y funcionaba correctamente.  
+Después, con el código Python ejecutamos nuestro modelo utilizando el video propuesto por usted, profe, y funcionaba correctamente tranne che alcune targhe uguali le segna come diverse, perche quando la macchina si avvicina, cambia la dimensione e pensa siano targhe diverse, abbiamo provato a trovare una soluzione ma non siamo riusciti a migliorare più di così. 
+
 
 Ahora pasamos a la parte del 4b.
 

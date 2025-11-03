@@ -1,60 +1,70 @@
-## Buongiorno prof. siamo Mattia Rizza e Riccardo Beletti e questo è il nostro README del 4 e 4b.
+## Buenos días, profe. Somos Mattia Rizza y Riccardo Beletti, y este es nuestro README del 4 y 4b.
 
-Per la rilevazione iniziale delle **targhe, automobili, moto** e persone siamo andati alla ricerca di informazioni avanzate su internet e abbiamo trovato questi passaggi che ci sono sembrati migliori per portare a termine la nostra consegna iniziale (la consegna 4).
+Para la detección inicial de matrículas, automóviles, motos y personas, buscamos información avanzada en Internet y encontramos estos pasos que nos parecieron los mejores para completar nuestra entrega inicial (la entrega 4).
 ---
 
-Prima di tutto abbiamo scaricato da internet qualche **dataset** di macchine, moto e persone riuscendo a ricavare *400* immagini miste,
-le abbiamo messe dentro ad una cartella e le abbiamo usate così: 
+Antes que nada, descargamos de Internet algunos **datasets** de coches, motos y personas, logrando obtener *400* imágenes mezcladas.
+Las colocamos dentro de una carpeta y las usamos de la siguiente manera: 
 
-Per prima cosa abbiamo aperto il terminale di anaconda e scritto 
+Primero abrimos el terminal de Anaconda y escribimos
+
 ```python
 conda create --name yolo-env1 python =3.12
 ```
-Siamo entrati nel nostro “yolo-env1” e abbiamo installato **label-studio**, 
-programma che abbiamo utilizzato per addestrare YOLO e poi con 
+
+Entramos en nuestro “yolo-env1” e instalamos **label-studio**,
+el programa que utilizamos para entrenar YOLO, y luego con
+
+
 ```python
 “label-studio start”
 ```
-l’abbiamo fatto partire e così l’abbiamo aperto facendo da **host localmente** interagendo attraverso il nostro *browser*,
-abbiamo creato il nostro progetto, inserito tutte le immagini e poi per ogni foto abbiamo dovuto specificare quale fosse una macchina, moto, targa e persona. 
-Procedimento lungo però quando l’abbiamo finito è stato molto soddisfacente avercela fatta. 
-L’abbiamo esportato in **YOLO with image** e ci ha creato una cartella zip con all’interno 
-1. una cartella con tutte le immagini utilizzate,
-2. una cartella con i “label”,
-3. un file con le classi (macchina, targa, persona, moto)
-4. file che è il nostro dataset .json.
+Lo ejecutamos y lo abrimos actuando como **host local**, interactuando a través de nuestro *navegador*.
+Creamos nuestro proyecto, insertamos todas las imágenes y luego, para cada foto, tuvimos que especificar qué era un coche, una moto, una matrícula o una persona.
+El procedimiento fue largo, pero cuando lo terminamos fue muy satisfactorio haberlo logrado. 
+Lo exportamos en formato **YOLO with image**, y nos generó una carpeta zip que contenía
 
-Abbiamo preso il file zip e l’abbiamo rinominato **Data**, e messo dentro alla cartella dove è presente la cartella con tutte le immagini 
+1. una carpeta con todas las imágenes utilizadas,
+2. una carpeta con las “labels”,
+3. un archivo con las clases (coche, matrícula, persona, moto),
+4. un archivo que es nuestro dataset .json.
 
-Dopo aver preso queste due cartelle, passiamo alla parte dove iniziamo ad addestrare il nostro modello utilizzando *Google Collabs* che è un servizio dove possiamo scrivere e runnare file python in un web browser utilizzando GPU offerta 
+Tomamos el archivo zip y lo renombramos **Data**, y lo colocamos dentro de la carpeta donde está la carpeta con todas las imágenes.
+
+Después de tener estas dos carpetas, pasamos a la parte donde empezamos a entrenar nuestro modelo utilizando *Google Collabs*, que es un servicio donde podemos escribir y ejecutar archivos Python en un navegador web utilizando la GPU ofrecida.
 [Google Collabs](https://colab.research.google.com/github/EdjeElectronics/Train-and-Deploy-YOLO-Models/blob/main/Train_YOLO_Models.ipynb)
 
-Per prima cosa ci siamo connessi al sito, poi runnando questo codice 
+Primero nos conectamos al sitio, luego, ejecutando este código
+
 ```python
 !nvidia-smi
 ```
-abbiamo verificato che la GPU sia stata attiva, 
-abbiamo caricato la nostra cartella *Data.zip* e l’abbiamo unzippata e cambiato nome in *custom_data* con questo codice 
+
+verificamos que la GPU estuviera activa,
+subimos nuestra carpeta *Data.zip*, la descomprimimos y le cambiamos el nombre a *custom_data* con este código
+
+
 ``` python
 !unzip -q /content/data.zip -d /content/custom_data
 ```
 
-Fatto questo ora siamo pronti a dividere i file i cartelle di **Addestramento** e **Validazione**, 
-dove la prima cartella conterrà le immagine effettive utilizzate dal modello, mentre la seconda cartella contiene le immagini utilizzate per verificare le prestazioni dopo ogni addestramento. 
-Premendo questo script dato dal creatore del sito 
+Hecho esto, ahora estamos listos para dividir los archivos en carpetas de **Entrenamiento** y **Validación**,
+donde la primera carpeta contendrá las imágenes efectivamente utilizadas por el modelo, mientras que la segunda carpeta contendrá las imágenes utilizadas para verificar el rendimiento después de cada entrenamiento. 
+Ejecutando este script proporcionado por el creador del sitio
+ 
 ``` python
 !wget -O /content/train_val_split.py https://raw.githubusercontent.com/EdjeElectronics/Train-and-Deploy-YOLO-Models/refs/heads/main/utils/train_val_split.py
 # TO DO: Improve robustness of train_val_split.py script so it can handle nested data folders, etc
 !python train_val_split.py --datapath="/content/custom_data" --train_pct=0.9
 ``` 
-ci creerà automaticamente la struttura di cartelle richiesta e sposterà casualmente il 90% del set di dati nella cartella “addestramento” e il 10% nella cartella “validazione”
+creará automáticamente la estructura de carpetas requerida y moverá aleatoriamente el 90% del conjunto de datos a la carpeta “entrenamiento” y el 10% a la carpeta “validación”.
 
+Cuando el script haya terminado, encontraremos una carpeta con las diversas subdivisiones
 
-Quando lo script ha terminato, troveremo una cartella con le varie suddivisioni 
 <img src="image/labels.png" width="300" />
 
-Successivamente abbiamo installato Ultralytics che è la libreria python che utilizzeremo per addestrare il modello YOLO 
-Terminata l’installazione abbiamo dovuto creare un file di configurazione dell’addestramento, questo file imposta la posizione delle cartelle di Addestramento e Convalida e definisce le classe dei modelli utilizzando questo codice datosi dal creatore del sito
+Posteriormente instalamos Ultralytics, que es la librería de Python que utilizaremos para entrenar el modelo YOLO.
+Una vez finalizada la instalación, tuvimos que crear un archivo de configuración del entrenamiento; este archivo define la ubicación de las carpetas de Entrenamiento y Validación y establece las clases de los modelos utilizando este código proporcionado por el creador del sitio.
 
 ```python
 # Python function to automatically create data.yaml config file
@@ -104,19 +114,22 @@ print('\nFile contents:\n')
 !cat /content/data.yaml
 ```
 
-Runnato questo codice avremo il file *Data.yaml*
+Ejecutando este código obtendremos el archivo *Data.yaml*.
 
-Fatto questo eravamo pronti per il nostro **addestramento**, 
-ora dovevamo solo decidere quale modello di YOLO e abbiamo utilizzato il modello *YOLO 11s* e con questo codice a
+Hecho esto, estábamos listos para nuestro **entrenamiento**.
+Solo teníamos que decidir qué modelo de YOLO usar, y utilizamos el modelo *YOLO 11s* con este código:
+
+
 ```python
 !yolo detect train data=/content/data.yaml model=yolo11s.pt epochs=60 imgsz=640
 ```
 
-Abbiamo fatto partire l’addestramento 
+Iniciamos el entrenamiento.
 
-Finito l’addestramento ho compresso e scaricato il modello e l’ha rinominato in *my_model.pt*
+Una vez finalizado, comprimí y descargué el modelo y lo renombré como *my_model.pt*.
 
-Chiudo tutto, riapro il terminale di anaconda, entro in **yolo-env1**, poi entro nella cartella dove ho messo il mio file *my_model.pt* e anche qui installo **ultralytics**, 
-poi con il codice python abbiamo fatto partire il nostro modello utilizzando il video proposto da voi prof e funzionava correttamente  
+Cierro todo, vuelvo a abrir el terminal de Anaconda, entro en **yolo-env1**, luego entro en la carpeta donde coloqué mi archivo *my_model.pt* y también aquí instalo **ultralytics**.
+Después, con el código Python ejecutamos nuestro modelo utilizando el video propuesto por usted, profe, y funcionaba correctamente.  
 
-Ora raccontiamo della parte del 4b
+Ahora pasamos a la parte del 4b.
+

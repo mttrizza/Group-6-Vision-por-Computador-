@@ -126,7 +126,7 @@ Solo teníamos que decidir qué modelo de YOLO usar, y utilizamos el modelo *YOL
 
 Iniciamos el entrenamiento.
 
-Una vez finalizado, comprimí y descargué el modelo y lo renombré como *my_model.pt*.
+Una vez finalizado, comprimí y descargué el modelo y lo renombré como *my_model*.
 
 Cierro todo, vuelvo a abrir el terminal de Anaconda, entro en **yolo-env1**, luego entro en la carpeta donde coloqué mi archivo *my_model.pt* y también aquí instalo **ultralytics**.
 Después, con el código Python ejecutamos nuestro modelo utilizando el video propuesto por usted, profe, y funcionaba correctamente con este código que nos proporcionó el creador del sitio web utilizamos:

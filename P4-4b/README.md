@@ -683,10 +683,9 @@ Tasa de Acierto: Porcentaje de matrículas únicas correctas identificadas.
 Tasa de Intento: Frecuencia con la que el OCR intentó una lectura (correcta o incorrecta).
 Ruido: Número de lecturas únicas incorrectas generadas.
 
-<img src="image/csv.png" width="300" />
-<img src="image/csv.png" width="300" />
-<img src="image/csv.png" width="300" />
-
+<img src="image/Tiempo_de_Inferencia_totale.png" width="300" />
+<img src="image/Tasa_de_intento.png" width="300" />
+<img src="image/Tasa_de_acierto.png" width="300" />
 
 
 Pequeñas Conclusiones

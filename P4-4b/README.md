@@ -460,18 +460,26 @@ finally:
         print(f'{cname}: {unique_totals[cname]}')
 
     #csv
+    import csv
     with open("CSV.csv", "w", newline="") as f:
-    w = csv.writer(f); w.writerow(["class","total"])
-    for cname in sorted(unique_totals.keys()):
-    w.writerow([cname, unique_totals[cname]])
-    print("CSV saved in: csd.csv")
+        w = csv.writer(f)
+        w.writerow(["class", "total"])
+        for cname in sorted(unique_totals.keys()):
+            w.writerow([cname, unique_totals[cname]])
+    print("CSV saved in: CSV.csv")
 
-    if source_type in ['video','usb'] and cap is not None: cap.release()
-    elif source_type == 'picamera' and cap is not None: cap.stop()
-    if record: recorder.release()
-    cv2.destroyAllWindows(); cv2.waitKey(1)
+    if source_type in ['video','usb'] and cap is not None:
+        cap.release()
+    elif source_type == 'picamera' and cap is not None:
+        cap.stop()
+    if record:
+        recorder.release()
+    cv2.destroyAllWindows()
+    cv2.waitKey(1)
 
 ```
+
+<img src="image/csv.png" width="300" />
 
 y luego lo ejecutamos usando la terminal de Anaconda con esto:
 ```python

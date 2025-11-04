@@ -498,5 +498,85 @@ Ahora pasamos a la parte del 4b.
 
 ## Entrega 4b
 
+Para cumplir con los requisitos de la entrega en formato "cuaderno" (.ipynb), fue necesario adaptar el script yolo_detect.py original. La modificación más inmediata fue la gestión de los parámetros de entrada: el sistema argparse del script, incompatible con la ejecución por celdas, se sustituyó por una celda de configuración global al inicio del notebook donde se definen las variables.
+```python
+MODEL_PATH = r"C:\Users\ricca\...\best.pt"
+VIDEO_SOURCE_PATH = r"C:\Users\ricca\...\videoTelefono4.mp4"
+OUTPUT_VIDEO_PATH = "risultato_Tesseract2.mp4"
+OUTPUT_CSV_PATH = "risultati_Tesseract2.csv"
+CONF_THRESHOLD = 0.4
+```
+Además de esta adaptación, se implementaron otras modificaciones estructurales más profundas (como la sustitución del tracker manual y la reestructuración de la lógica de guardado CSV), las cuales se detallan a continuación.
+La segunda celda de ambos notebooks se ocupa de cargar y preparar los modelos. Primero carga el YOLO ya entrenado con model = YOLO(MODEL_PATH) y le hace un “calentamiento” enviándole un dummy_frame para evitar la latencia del primer frame durante el procesado real. El calentamiento se hace así:
+```python
+model = YOLO(MODEL_PATH)
+dummy_frame = np.zeros((720, 1280, 3), dtype=np.uint8)
+model.track(dummy_frame, persist=True, verbose=False)
+```
+Esto es igual en las dos versiones: YOLO (y las librerías que lo envuelven) suelen cargar pesos y preparar caches la primera vez, y el dummy evita que el primer frame del vídeo sea muy lento o que falle si algo no está inicializado
+Después del YOLO viene la inicialización del motor OCR. En la versión con Tesseract se configura la ruta al ejecutable de Tesseract porque en Windows Tesseract no entra sólo con pip; hay que instalar su binario y decirle al wrapper dónde está:
+```python
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.get_tesseract_version()
+```
+Ese get_tesseract_version() sirve también como comprobación: si falla, te imprime un error y sabes que debes instalar o corregir ruta. En la versión con EasyOCR se carga el lector con:
+```python
+ocr_reader = easyocr.Reader(['en'], gpu=True)
+```
+y si hay problemas en GPU se intenta cargar con gpu=False. EasyOCR incluye sus propios modelos en la librería, así que su carga es más directa que Tesseract (que depende de un binario externo). La diferencia práctica para nosotros fue: Tesseract necesita instalación externa y ruta configurada, EasyOCR solo pip install easyocr y luego Reader, aunque EasyOCR puede tirar mucho de memoria si activas GPU.
+La tercera celda es donde están las funciones de soporte —aquí está la lógica que reutilizan ambos notebooks y se explica el “por qué” de ciertas elecciones. La función canonical_classname(name) normaliza nombres distintos que puedan salir del detector, por ejemplo si tu modelo devuelve license plate, matricula o plate siempre lo mapea a 'license-plate'. Eso evita confusiones a la hora de contar y relacionar objetos:
+```python
+def canonical_classname(name: str) -> str:
+    s = name.strip().lower().replace('_', ' ').replace('-', ' ')
+    plate_aliases = {'license plate','licence plate','number plate','plate','vehicle plate','car plate','licence','license', 'matricula'}
+    moto_aliases = {'motorcycle','motorbike','moped','scooter', 'moto'}
+    car_aliases = {'car','automobile','vehicle','auto', 'coche'}
+    person_aliases = {'person','pedestrian','people', 'persona'}
+    if s in plate_aliases: return 'license-plate'
+    if s in moto_aliases: return 'motorcycle'
+    if s in car_aliases: return 'car'
+    if s in person_aliases: return 'person'
+    return s
+```
+Otra función pequeña pero útil es get_box_center(box) (centro del bounding box). Se usa para asociar la matrícula con el coche: si el centro del bounding box de la matrícula está dentro de la caja del coche, asumimos que pertenece a ese coche. Es una heurística sencilla pero eficaz en la mayoría de vídeos:
+```python
+def get_box_center(box):
+    x1, y1, x2, y2 = box
+    return int((x1 + x2) / 2), int((y1 + y2) / 2)
+```
+Luego viene la pieza donde los dos notebooks diferen de verdad: la función run_ocr_on_plate(...). En la versión Tesseract se hace bastante pre-procesado antes de llamar a pytesseract.image_to_string(). Las operaciones típicas que se ven son: escalado para agrandar la matrícula (mejora el OCR), conversión a gris, desenfoque ligero para quitar ruido, binarización con Otsu, y a veces añadir un borde blanco para evitar que Tesseract corte caracteres en los bordes. El llamado a Tesseract incluye parámetros para decirle que espere una línea de texto (--psm 7) y un whitelist de caracteres (-c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789), así:
+```python
+img_large = cv2.resize(plate_image, (w * scale_factor, h * scale_factor), interpolation=cv2.INTER_CUBIC)
+gray = cv2.cvtColor(img_large, cv2.COLOR_BGR2GRAY)
+gray_blurred = cv2.medianBlur(gray, 3)
+_, thresh = cv2.threshold(gray_blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+custom_config = r'--psm 7 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+text = pytesseract.image_to_string(thresh, config=custom_config)
+text = "".join(c for c in text if c.isalnum())
+```
+Estas etapas buscan maximizar la legibilidad de Tesseract porque es muy sensible a ruido y contraste. 
+En EasyOCR, la función run_ocr_on_plate es mucho más simple. Al ser un modelo AI moderno, no necesita el pre-procesado manual de Tesseract. La función simplemente llama al lector, extrae el texto y la confianza original, y aplica un filtro minimo:
+```python
+def run_ocr_on_plate(plate_image):
+    if plate_image.size == 0:
+        return ""
+    text = ""
+    try:
+        result = ocr_reader.readtext(plate_image, detail=1, paragraph=False)
+        if result:
+            text = result[0][1]
+            conf = result[0][2] # Tomamos la confianza de EasyOCR
+            text = "".join(c for c in text if c.isalnum()).upper()
+
+            if conf > 0.1 and len(text) >= 3: 
+                return text # Devolver solo el texto limpio
+                
+    except Exception as e:
+        pass
+    
+    return ""
+```
+
+
 
 

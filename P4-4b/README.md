@@ -668,6 +668,36 @@ with open(summary_file_path, "w", encoding='utf-8') as f:
     f.write(f"Tiempo total de procesamiento: {processing_time:.2f} segundos.\n")
 
 ```
+## Comparativa de Modelos OCR (Tesseract vs. EasyOCR)
+Se realizó una comparativa entre dos modelos de OCR (Tesseract y EasyOCR) para evaluar su rendimiento en la extracción de texto de matrículas.
+Ambos prototipos (Tesseract y EasyOCR) se ejecutaron sobre los mismos dos vídeos de prueba:
+videoProva: vídeo proporcionado por el profesor
+videoTelefono4: vídeo realizado por nosotros, más corto, con una matrícula en primer plano y fácil de leer, y otros dos coches que pasan.
+Los datos para esta comparativa se obtuvieron analizando los archivos .csv y .txt generados por ambos prototipos.
+El Tiempo de Inferencia y el Conteo Total se extrajeron directamente de los archivos de resumen .txt.
+Para calcular la Tasa de Acierto, fue necesario un proceso manual: primero revisé visualmente los vídeos de prueba (videoProva y videoTelefono4) para crear una lista de matrículas correctas (la "Ground Truth"). Posteriormente, comparé esta lista "Ground Truth" con las matrículas extraídas por cada modelo, las cuales están registradas en los archivos .csv detallados (risultati_Tesseract.csv y risultati_EASYOCR.csv).
 
+Se analizaron cuatro métricas clave:
+Tiempo de Inferencia: Tiempo total para procesar el vídeo.
+Tasa de Acierto: Porcentaje de matrículas únicas correctas identificadas.
+Tasa de Intento: Frecuencia con la que el OCR intentó una lectura (correcta o incorrecta).
+Ruido: Número de lecturas únicas incorrectas generadas.
+
+<img src="image/csv.png" width="300" />
+<img src="image/csv.png" width="300" />
+<img src="image/csv.png" width="300" />
+
+
+
+Pequeñas Conclusiones
+Basado en los datos y gráficos de la comparativa, se pueden extraer las siguientes conclusiones:
+
+Tiempo de Inferencia: Contrariamente a la suposición inicial, EasyOCR fue significativamente más rápido en ambos vídeos (un 19% más rápido en videoProva y un 32% en videoTelefono4). La razón es que la lógica de "memoria" y "voto" que tuvimos que implementar para estabilizar Tesseract requería un costoso pre-procesamiento de imagen (escalado, blur, threshold) en cada fotograma, lo que penalizó su rendimiento. EasyOCR, al no necesitar este pre-procesamiento, resultó ser más eficiente.
+
+Tasa de Acierto (Precisión): Los resultados de precisión fueron mixtos. Tesseract ganó por poco en el videoProva (8.7% vs 4.3%), mientras que EasyOCR fue el único capaz de leer una matrícula en el videoTelefono4 (33.3% vs 0%).
+
+Conclusión Clave (Ruido vs. Intento): El Gráfico 3 y la tabla de métricas revelan la conclusión más importante. En videoTelefono4, ambos modelos "intentaron" leer la matrícula en casi todos los fotogramas (Tasa de Intento > 90%). Sin embargo, Tesseract produjo 15 lecturas únicas incorrectas (mucho "ruido"), mientras que EasyOCR solo produjo 5. Lo mismo ocurrió en videoProva, donde Tesseract generó 40 lecturas incorrectas frente a las 17 de EasyOCR.
+
+Veredicto Final: Aunque la precisión de ambos fue baja debido a la dificultad de los vídeos, EasyOCR es el modelo superior. Es más rápido, genera mucho menos "ruido" (lecturas basura) y fue el único capaz de gestionar los ángulos difíciles del videoTelefono4. Tesseract demostró ser poco fiable, lento (debido al pre-procesamiento) y ruidoso para esta tarea específica.
 
 

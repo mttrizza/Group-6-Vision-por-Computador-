@@ -700,3 +700,5 @@ Conclusión Clave (Ruido vs. Intento): El Gráfico 3 y la tabla de métricas rev
 Veredicto Final: Aunque la precisión de ambos fue baja debido a la dificultad de los vídeos, EasyOCR es el modelo superior. Es más rápido, genera mucho menos "ruido" (lecturas basura) y fue el único capaz de gestionar los ángulos difíciles del videoTelefono4. Tesseract demostró ser poco fiable, lento (debido al pre-procesamiento) y ruidoso para esta tarea específica.
 
 
+
+He subido a la carpeta "Archivos" los archivos csv y txt creados. Los que tienen un 1 en el nombre son para el videoProva y los que tienen un 2 son para el videoTelefono4.

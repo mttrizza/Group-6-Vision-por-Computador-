@@ -1,0 +1,7 @@
+--- Resumen de Conteo Único (cuente el total de cada clase) ---
+Total de coches únicos rastreados: 53
+Total de personas únicas rastreadas: 36
+Total de motos únicas rastreadas: 5
+Total de matrículas únicas rastreadas: 51
+
+Tiempo total de procesamiento: 1060.32 segundos.

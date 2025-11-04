@@ -576,7 +576,98 @@ def run_ocr_on_plate(plate_image):
     
     return ""
 ```
+La diferencia más importante para el resultado final no está solo en estas funciones, sino en la lógica de estabilización (memoria) que se aplica a ambos modelos en la Cella 4.
+Para evitar el parpadeo (flickering) donde la lectura cambia en cada frame, ambos scripts ignoran la confianza original del OCR (o usan un filtro muy bajo). En su lugar, acumulan "votos" para cada track_id en un diccionario global ocr_history.
+El texto que finalmente se muestra en el video y se guarda en el CSV es el que tiene más votos (best_text), y su confianza es una "confianza de estabilidad" que calculamos nosotros (ej. votos_totales / votos_best_text). Esta estrategia se aplica tanto a Tesseract como a EasyOCR para hacer la comparativa justa y obtener un resultado visual estable.
 
+Después de las tres primeras celdas de configuración y funciones auxiliares, el código entra en la parte más importante: el bucle principal de procesamiento.
+Aquí es donde se abren los vídeos, se ejecuta el modelo YOLO en cada frame, se asocian las detecciones con los objetos que ya se estaban siguiendo, y finalmente se aplica el OCR sobre las matrículas detectadas.
+En los dos notebooks (Tesseract y EasyOCR) esta parte es casi idéntica, con pequeñas diferencias únicamente en la función que lee el texto.
+Primero se abre el vídeo con OpenCV y se preparan los archivos de salida.
+En esta parte del código se crea el objeto cv2.VideoCapture y se comprueba que se haya abierto correctamente.
+Luego se configura también el VideoWriter para poder grabar el vídeo final con los resultados, usando el códec MP4V y la misma resolución que el vídeo original:
+```python
+cap = cv2.VideoCapture(VIDEO_SOURCE_PATH)
+if not cap.isOpened():
+    print(f"ERROR: No se pudo abrir el video fuente: {VIDEO_SOURCE_PATH}")
+else:
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    recorder = cv2.VideoWriter(OUTPUT_VIDEO_PATH, fourcc, fps, (frame_width, frame_height))
+```
+Justo después de esta parte se inicializan los diccionarios para el conteo (unique_object_ids) y para la memoria OCR (ocr_history).
+Es importante notar que toda la lógica de tracking manual del script .py original ha sido eliminada. No se usa ninguna estructura track_history ni cálculos manuales de IoU.
+El seguimiento ahora se gestiona directamente con la función model.track() de Ultralytics:
+```python
+while cap.isOpened():
+    # ...
+    results = model.track(frame, persist=True, verbose=False)
+    # ...
+    if results[0].boxes and results[0].boxes.id is not None:
+        # Extraemos el ID directamente de YOLO
+        track_id = int(boxes.id[i])
+```
+El parámetro persist=True hace que YOLO mantenga internamente las identidades (los IDs) de los objetos entre frames, algo fundamental para no contar varias veces el mismo coche o la misma persona.
+A partir de aquí, el código recorre todas las detecciones (boxes) y las agrupa en listas separadas (cars_in_frame, plates_in_frame, etc.) usando la función canonical_classname().
+Inmediatamente después, se aplica la lógica de OCR con estabilización (memoria) a cada plate detectada:
+1.	Se llama a text = run_ocr_on_plate(plate_img) para obtener una lectura.
+2.	Si la lectura es válida (if text:), se añade un "voto" al track_id correspondiente en el diccionario ocr_history.
+3.	El código determina cuál es el texto más votado (best_text) y calcula su "confianza de estabilidad" (ej. 80% de los votos).
+```python
+if track_id in ocr_history:
+    history_for_id = ocr_history[track_id]
+    best_text = max(history_for_id, key=history_for_id.get)
+    total_votes = sum(history_for_id.values())
+    stability_conf = best_votes / total_votes
+
+    plate['text'] = best_text
+    plate['text_conf'] = stability_conf
+```
+Esto asegura que el texto de la matrícula no "parpadee" (flickering) en el video final.
+El siguiente paso dentro del bucle es la asociación y visualización.
+Primero, el código asocia las matrículas a los coches comprobando si el centro de la matrícula (get_box_center) está dentro del recuadro del coche.
+Luego, dibuja los resultados:
+•	Para coches, personas y motos, dibuja el recuadro y su track_id (ej. "Car ID: 24").
+```python
+cv2.putText(frame, f"Car ID:{car['track_id']}", (x1, y1 - 10), ...)
+```
+•	Para las matrículas, dibuja el texto estabilizado y la confianza de estabilidad, cumpliendo el requisito de "visualización de la matrícula leída".
+```python
+if plate.get('text', ''): 
+                    text_to_draw = f"{plate['text']} ({plate.get('text_conf', 0):.2f})"
+                    cv2.putText(frame, text_to_draw, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+```
+Cuando se terminan los frames del vídeo, o si el usuario cierra la ventana, el bucle finaliza y se pasa a la última parte del código: guardar resultados y liberar recursos.
+Cuando se terminan los frames, el bucle finaliza y se pasa a la última celda (Celda 5) para guardar los resultados.
+Aquí, el script cumple con el formato CSV exacto solicitado en la entrega. El CSV generado no es un simple log de detecciones, sino un registro estructurado por objeto principal (coche, persona, moto) en cada fotograma.
+1.	Para cada car (o person/moto), se crea una fila (row) con sus datos (fotograma, tipo_oggetto, confianza, identificador_tracking, x1, y1, x2, y2).
+2.	Si a esa car se le ha asociado una plate, la fila se actualiza (row.update) para rellenar las columnas de la matrícula: matrícula_en_su_caso: si, confianza_matricula (la confianza de estabilidad), mx1, my1... y texto_matricula (el texto estabilizado).
+3.	Todas estas filas se guardan en la lista csv_results durante el bucle.
+Finalmente, en la Celda 5, el script guarda los resultados:
+1.	Guardado del CSV Detallado:
+ o	Convierte la lista csv_results (que contiene los datos de cada fotograma) en un DataFrame de pandas.
+ o	Asegura que el DataFrame tenga exactamente las columnas y el orden solicitados en la entrega (colonne_richieste).
+ o	Guarda el DataFrame en el archivo CSV (ej. risultati_EASYOCR_STABILE.csv).
+```python
+df = pd.DataFrame(csv_results)
+df = df[colonne_richieste]
+df.to_csv(OUTPUT_CSV_PATH, index=False)
+```
+2.	Guardado del Resumen (Conteo y Tiempo):
+ o	Calcula el conteo total de cada clase usando len() sobre los set de unique_object_ids.
+ o	Calcula el processing_time restando end_time y start_time.
+ o	Imprime este resumen en la consola.
+ o	Guarda este mismo resumen en un archivo .txt (ej. Total_clases_Tesseract2.txt), para que los datos de la comparativa       (tiempo y conteo) estén fácilmente accesibles.
+```python
+with open(summary_file_path, "w", encoding='utf-8') as f:
+    f.write(f"Total de coches únicos rastreados: {total_cars}\n")
+    # ... (etc.)
+    f.write(f"Tiempo total de procesamiento: {processing_time:.2f} segundos.\n")
+
+```
 
 
 

@@ -131,6 +131,8 @@ Una vez finalizado, comprimí y descargué el modelo y lo renombré como *my_mod
 Cierro todo, vuelvo a abrir el terminal de Anaconda, entro en **yolo-env1**, luego entro en la carpeta donde coloqué mi archivo *my_model.pt* y también aquí instalo **ultralytics**.
 Después, con el código Python ejecutamos nuestro modelo utilizando el video propuesto por usted, profe, y funcionaba correctamente excepto que marca algunas matrículas idénticas como diferentes, porque cuando el coche se acerca, el tamaño cambia y piensa que son matrículas diferentes, intentamos encontrar una solución pero no pudimos mejorar más.
 
+<video src="image/demo_tarea4.mp4" width="640" controls></video>
+
 
 
 Ahora pasamos a la parte del 4b.

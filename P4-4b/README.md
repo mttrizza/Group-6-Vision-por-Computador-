@@ -490,7 +490,7 @@ excepto que marca algunas matrículas idénticas como diferentes, porque cuando 
 
 Hemos incluido el vídeo de demostración de la tarea 4 en la entrega del sitio web de ULPGC.
 
-*(Pero para la entrega 4b hemos modificado el archivo .py y también la forma en que lo ejecutamos)*
+*(Pero para la entrega 4b hemos modificado el archivo .py ,también la forma en que lo ejecutamos y el CSV)*
 
 Ahora pasamos a la parte del 4b.
 

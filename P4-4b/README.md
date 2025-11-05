@@ -699,9 +699,7 @@ Tasa de Acierto (Precisión): Los resultados de precisión fueron mixtos. Tesser
 
 Conclusión Clave (Ruido vs. Intento): El Gráfico 3 y la tabla de métricas revelan la conclusión más importante. En videoTelefono4, ambos modelos "intentaron" leer la matrícula en casi todos los fotogramas (Tasa de Intento > 90%). Sin embargo, Tesseract produjo 15 lecturas únicas incorrectas (mucho "ruido"), mientras que EasyOCR solo produjo 5. Lo mismo ocurrió en videoProva, donde Tesseract generó 40 lecturas incorrectas frente a las 17 de EasyOCR.
 
-Veredicto Final: Aunque la precisión de ambos fue baja debido a la dificultad de los vídeos, EasyOCR es el modelo superior. Es más rápido, genera mucho menos "ruido" (lecturas basura) y fue el único capaz de gestionar los ángulos difíciles del videoTelefono4. Tesseract demostró ser poco fiable, lento (debido al pre-procesamiento) y ruidoso para esta tarea específica.
-
-
+Veredicto Final: Aunque la precisión de ambos fue baja debido a la dificultad de los vídeos, EasyOCR es el modelo superior. Es más rápido, genera menos "ruido" (lecturas basura) y fue el único capaz de gestionar el videoTelefono4. Tesseract demostró ser poco fiable, lento (debido al pre-procesamiento) y ruidoso para esta tarea específica.
 
 He subido a la carpeta "Archivos" los archivos csv y txt creados. Los que tienen un 1 en el nombre son para el videoProva y los que tienen un 2 son para el videoTelefono4.
 En este enlace de OneDrive están los vídeos creados por el código.

@@ -4,6 +4,8 @@ Para la detección inicial de matrículas, automóviles, motos y personas, busca
 ---
 [Link DataSet](https://alumnosulpgc-my.sharepoint.com/:f:/g/personal/mattia_rizza101_alu_ulpgc_es/EjlKID6EsRRDqddAQjm-4ycBq4TUUqFgH1ojPQkmsG_NbQ?e=SfxrWp)
 
+[Link Video](https://alumnosulpgc-my.sharepoint.com/:f:/g/personal/mattia_rizza101_alu_ulpgc_es/EqpZZBMMlulDnzofQEePvwgB0qOztFoO2pBSgAacYuIcXQ?e=NXpclN)
+
 
 Antes que nada, descargamos de Internet algunos **datasets** de coches, motos y personas, logrando obtener *400* imágenes mezcladas.
 Las colocamos dentro de una carpeta y las usamos de la siguiente manera: 

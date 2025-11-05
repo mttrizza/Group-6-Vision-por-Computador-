@@ -704,3 +704,6 @@ Veredicto Final: Aunque la precisión de ambos fue baja debido a la dificultad d
 
 
 He subido a la carpeta "Archivos" los archivos csv y txt creados. Los que tienen un 1 en el nombre son para el videoProva y los que tienen un 2 son para el videoTelefono4.
+En este enlace de OneDrive están los vídeos creados por el código.
+[Link Video Entrega4b](https://alumnosulpgc-my.sharepoint.com/:f:/g/personal/riccardo_belletti101_alu_ulpgc_es/ErMs9xzmKzRHsWZ8_wi_mQkBLkKLrjru1S7ClrSo5bqVbw?e=IdfsSd)
+

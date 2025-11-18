@@ -4,6 +4,8 @@ Buenos días prof. somos Mattia Rizza y Riccardo Belletti
 ## Este es nuestro proyecto de VC de la semana 5
 ---
 
+[Link Video](https://alumnosulpgc-my.sharepoint.com/:f:/g/personal/mattia_rizza101_alu_ulpgc_es/Emd1JH8HPjRErAHb01fiYUcBdl0M23imuzaqFW7IxEB9VQ?e=G4z5rS)
+
 El primer ejercicio que hemos hecho ha sido realizar un prototipo de libre elección.
 Hemos creado este **“filtro de Instagram”** donde creamos dos rectángulos, uno para ocultar la cara con la palabra **“CENSORED”** y otro debajo de la cara con escrito **“PERSONA BUSCADA”**.
 

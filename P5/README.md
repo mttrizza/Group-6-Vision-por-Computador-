@@ -163,7 +163,7 @@ MAPA_CARPETAS = {
 ```
 Nota sobre la selección de clases: Cabe destacar que, aunque los diccionarios de configuración (MAPA_CARPETAS y COLORES_REACCION) conservan la estructura completa de 7 emociones del estándar FER-2013, el modelo final se ha optimizado utilizando solo un subconjunto de 5 clases. Durante la fase experimental, se entrenó inicialmente el modelo con el set completo; sin embargo, se observó que ciertas emociones generaban confusión y reducían la precisión global. Se optó por filtrar el entrenamiento a las 5 emociones más distintivas para maximizar la robustez. No obstante, se ha mantenido la definición completa en el código para preservar la consistencia con la indexación original del dataset y prevenir excepciones de tipo KeyError o desbordamientos de índice en caso de interactuar con modelos no filtrados.
 
-Dentro del bucle principal leemos cada frame y hacemos una copia para dibujar encima. Una parte muy importante del prototipo es el cálculo del embedding en tiempo real. Aquí volvemos a usar DeepFace.represent, pero esta vez con detector_backend="opencv", porque el detector SSD era más lento:
+Dentro del bucle principal leemos cada frame y hacemos una copia para dibujar encima. Una parte muy importante del prototipo es el cálculo del embedding en tiempo real. Aquí volvemos a usar DeepFace.represent, pero esta vez con detector_backend="opencv", También lo hemos probado con SSD y funciona mejor, pero es más lento.
 ```python
 embedding_obj = DeepFace.represent(
     img_path = frame, 

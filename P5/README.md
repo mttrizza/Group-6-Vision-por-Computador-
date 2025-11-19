@@ -89,7 +89,7 @@ w_text_y = sign_y + (sign_h + w_text_h) // 2
 ```
 
 
-#detección de emociones
+##detección de emociones
 
 El objetivo principal de este trabajo es la implementación de un detector de emociones en tiempo real que aplica filtros visuales ('reacciones') en función del estado de ánimo del usuario.
 

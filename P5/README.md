@@ -88,9 +88,9 @@ w_text_x = sign_x + (sign_w - w_text_w) // 2
 w_text_y = sign_y + (sign_h + w_text_h) // 2
 ```
 
-
-##detección de emociones
-
+---
+## Detección de emociones
+---
 El objetivo principal de este trabajo es la implementación de un detector de emociones en tiempo real que aplica filtros visuales ('reacciones') en función del estado de ánimo del usuario.
 
 El sistema se ha desarrollado en el notebook VC_Entrega5_emociones.ipynb evitando el uso de la función automática analyze(). En su lugar, se ha replicado la arquitectura de extracción de características y clasificación: se utiliza el modelo FaceNet para generar los embeddings faciales y, a partir de estos vectores numéricos, se entrena un clasificador SVM personalizado. Esto permite un control total sobre el proceso de aprendizaje y predicción.

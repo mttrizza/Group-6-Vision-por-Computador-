@@ -91,13 +91,14 @@ w_text_y = sign_y + (sign_h + w_text_h) // 2
 ---
 ## Detección de emociones
 ---
+
 El objetivo principal de este trabajo es la implementación de un detector de emociones en tiempo real que aplica filtros visuales ('reacciones') en función del estado de ánimo del usuario.
 
 El sistema se ha desarrollado en el notebook VC_Entrega5_emociones.ipynb evitando el uso de la función automática analyze(). En su lugar, se ha replicado la arquitectura de extracción de características y clasificación: se utiliza el modelo FaceNet para generar los embeddings faciales y, a partir de estos vectores numéricos, se entrena un clasificador SVM personalizado. Esto permite un control total sobre el proceso de aprendizaje y predicción.
 
-En lugar de usar un dataset enorme completo, utilicé una parte del FER-2013, que estructuré dentro de C:/dataset_VC/train y test. Para entrenar elegí solo cinco emociones: angry, happy, sad, surprise y neutral, que corresponden a las carpetas 0, 3, 4, 5 y 6. Esto lo explico también dentro de la función LoadDataset_Emociones, que aparece en la segunda sección del notebook. Allí programé todo el proceso de lectura de imágenes, redimensionado a la dimensión exacta que pide FaceNet y cálculo de los embeddings usando DeepFace.represent(). Además incluí un límite de máximo 500 imágenes por clase porque algunas carpetas tenían demasiadas muestras y quería evitar que el entrenamiento tardara una eternidad o que el conjunto quedara demasiado desequilibrado.
+En lugar de usar un dataset enorme completo, utilizamos una parte del FER-2013, que estructuramos dentro de C:/dataset_VC/train y test. Para entrenar elegimos solo cinco emociones: angry, happy, sad, surprise y neutral, que corresponden a las carpetas 0, 3, 4, 5 y 6. Esto lo explicamos también dentro de la función LoadDataset_Emociones, que aparece en la segunda sección del notebook. Allí programamos todo el proceso de lectura de imágenes, redimensionado a la dimensión exacta que pide FaceNet y cálculo de los embeddings usando DeepFace.represent(). Además incluimos un límite de máximo 500 imágenes por clase porque algunas carpetas tenían demasiadas muestras y queríamos evitar que el entrenamiento tardara una eternidad o que el conjunto quedara demasiado desequilibrado.
 
-La primera sección del notebook empieza cargando las librerías principales y, sobre todo, el modelo FaceNet. Aquí utilizo la función DeepFace.build_model("Facenet"), que es la base para convertir una imagen en un vector numérico. Por ejemplo, el inicio del código es así:
+La primera sección del notebook empieza cargando las librerías principales y, sobre todo, el modelo FaceNet. Aquí utilizamos la función DeepFace.build_model("Facenet"), que es la base para convertir una imagen en un vector numérico. Por ejemplo, el inicio del código es así:
 ```python
 print("Cargando modelo FaceNet...")
 model_name = "Facenet"
@@ -146,7 +147,7 @@ model_svm = joblib.load("mio_modello_emozioni.pkl")
 classlabels = joblib.load("etichette_emozioni.pkl")
 print(f"✅ Modelo cargado. El modelo conoce {len(classlabels)} clases.") 
 ```
-a variable classlabels desempeña un papel crítico en la arquitectura del sistema, garantizando la correspondencia biunívoca entre los índices predichos por el SVM y las etiquetas reales. La ausencia de este mecanismo de persistencia podría derivar en un desajuste de los índices y, consecuentemente, en predicciones erróneas.
+La variable classlabels desempeña un papel crítico en la arquitectura del sistema, garantizando la correspondencia biunívoca entre los índices predichos por el SVM y las etiquetas reales. La ausencia de este mecanismo de persistencia podría derivar en un desajuste de los índices y, consecuentemente, en predicciones erróneas.
 
 Para la interpretación semántica de estos resultados, se implementó una estructura de mapeo que traduce los identificadores originales del dataset (ej. '0', '3', '4') a etiquetas legibles:
 ```python

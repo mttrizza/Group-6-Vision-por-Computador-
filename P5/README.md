@@ -87,3 +87,12 @@ w_font_scale = sign_w / (w_text_w + 20)
 w_text_x = sign_x + (sign_w - w_text_w) // 2
 w_text_y = sign_y + (sign_h + w_text_h) // 2
 ```
+
+
+#detección de emociones
+
+Este proyecto nació con la idea de construir un pequeño sistema capaz de detectar emociones humanas a partir de la cámara, utilizando DeepFace pero sin depender de las funciones ya hechas como analyze().
+El notebook VC_Entrega5.ipynb contiene todo el proceso completo: desde la carga del modelo FaceNet hasta el entrenamiento final y el prototipo “en vivo” que reacciona con un pequeño filtro visual dependiendo de la emoción detectada.
+
+El foco principal del trabajo que es un detector de emociones que funciona en tiempo real y que crea una “reacción” visual en la imagen según el estado de ánimo. Para conseguirlo seguí la misma línea del ejemplo de DeepFace que vimos en clase, especialmente el del fichero VC_P5_deepface_kfold donde yo mismo genero los embeddings y entreno el clasificador. Por eso, en la primera sección del notebook empieza todo cargando el modelo FaceNet (“Cargando modelo FaceNet…”), que es lo que DeepFace usa internamente para convertir un rostro en un vector numérico. Este vector es lo que después alimenta al modelo SVM.
+

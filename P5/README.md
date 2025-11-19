@@ -122,7 +122,7 @@ embedding_objs = DeepFace.represent(
 )
 img_embedding = embedding_objs[0]["embedding"]
 ```
-Elegímos enforce_detection=False porque algunas imágenes del dataset no tenían una detección perfecta y prefería saltar esos errores. Al final la función devuelve X, Y y las etiquetas de clase, que serán importantes más adelante.
+Elegímos enforce_detection=False porque algunas imágenes del dataset no tenían una detección perfecta y se preferíò saltar esos errores. Al final la función devuelve X, Y y las etiquetas de clase, que serán importantes más adelante.
 La tercera sección del cuaderno es donde cargamos el dataset organizado en C:/dataset_VC/train y C:/dataset_VC/test 
 (Puedes encontrar este conjunto de datos,dataset_VC, en el enlace del vídeo al principio del readme). Allí se puede ver exactamente cuándo empieza la carga del training:
 ```python

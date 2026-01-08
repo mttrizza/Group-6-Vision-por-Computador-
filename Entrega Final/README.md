@@ -67,7 +67,7 @@ Progetto_VC/
 
 ### Descrizione delle cartelle e dei file principali
 
-create_database.ipynb
+## create_database.ipynb
 Scopo del notebook
 L’obiettivo di create_dataset.ipynb è:
 - leggere tutte le immagini presenti nelle cartelle del dataset
@@ -118,6 +118,58 @@ Questo file viene poi utilizzato negli altri notebook o script per:
 - addestrare il classificatore
 - testare le prestazioni del modello
 
+#collect_data.py
+Lo scopo principale di collect_data.py è:
+
+- acquisire immagini da una sorgente (ad esempio webcam)
+- salvare automaticamente le immagini nelle cartelle corrette del dataset
+- associare ogni immagine alla classe selezionata
+
+In questo modo è possibile costruire il dataset in modo più ordinato rispetto a una raccolta completamente manuale.
+
+Come funziona a grandi linee
+
+Lo script segue una logica semplice:
+
+- inizializza la sorgente video
+- permette di selezionare una classe (o una modalità)
+- acquisisce frame dall’ingresso video
+- salva i frame come immagini nelle cartelle del dataset
+
+Non è pensato per essere uno strumento robusto o definitivo, ma come un supporto pratico per il progetto.
+
+Librerie utilizzate
+
+Le principali librerie utilizzate sono:
+
+- cv2 (OpenCV) per l’acquisizione delle immagini
+- os per la gestione delle directory
+
+Non sono state utilizzate librerie avanzate di data acquisition o interfacce grafiche, per mantenere il codice semplice e leggibile.
+
+Struttura dei dati generati
+
+Le immagini salvate dallo script finiscono nella cartella:
+
+- data/raw/
+
+Ogni classe corrisponde a una sottocartella (lettere, simboli o comandi). Lo script assume che questa struttura esista già o venga creata automaticamente.
+
+Il nome dei file segue una numerazione progressiva, sufficiente per distinguere le immagini all’interno della stessa classe.
+
+Queste semplificazioni sono state accettate per concentrarci sugli aspetti principali del corso, piuttosto che sulla robustezza del software.
+
+Ruolo nel progetto
+
+collect_data.py rappresenta il primo passo della pipeline:
+
+raccolta delle immagini
+
+creazione del dataset (create_dataset.ipynb)
+
+training del classificatore
+
+Senza questo script, la costruzione del dataset sarebbe stata molto più lenta e disordinata.
 ---
 
 ## Tecnologie utilizzate

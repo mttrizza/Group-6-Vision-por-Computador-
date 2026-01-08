@@ -3,6 +3,7 @@ Buongiorno prof siamo Mattia Rizza e Riccardo Belletti e questo è il nostro pro
 L’obiettivo del progetto è stato applicare in modo pratico i concetti visti a lezione volendo creare un vero e proprio traduttore per la lingua dei segni.
 Il progetto non nasce come un lavoro di ricerca avanzata, ma come un esercizio completo e realistico.
 Abbiamo preso un'idea che potrebbe sembrare banale inizialmente, ci abbiamo messo del nostro e siamo riusciti a tirare fuori un bel programma che si potrebbe realmente usare per aiutare le persone con questa disabilità.
+Una volta lanciato il programma si aprirà il video e l'utente vedrà che ci troviamo in modalità traduttore 
 [qui riccardo scrive come funziona il programma]
 [magari qui mettiamo l'immagine dei vari segni con le corrispettive lettere]
 
@@ -10,7 +11,7 @@ Abbiamo preso un'idea che potrebbe sembrare banale inizialmente, ci abbiamo mess
 
 ## Idea generale del progetto
 
-L’idea di base è stata quello di mixare alcuni **dataset di immagini organizzat in classi** trovati su Kaggle e poi integrati con delle immagini fatte da noi, sulle lettere che il nostro programma faceva fatica a riconoscere correttamente.
+L’idea di base è stata quello di mixare alcuni **dataset di immagini organizzati in classi** trovati su Kaggle e poi integrati con delle immagini fatte da noi, sulle lettere che il nostro programma faceva fatica a riconoscere correttamente.
 
 In particolare:
 - abbiamo raccolto immagini grezze (raw data) che erano già organizzate in cartelle
@@ -29,6 +30,7 @@ Progetto_VC/
 ├── __pycache__/
 │
 ├── create_dataset.ipynb
+├── train_classifier.ipynb
 │
 ├── data/
 │   ├── collect_data.py
@@ -53,12 +55,10 @@ Progetto_VC/
 │   └── new_data/
 │
 ├── inference_classifier.py
-├── inference_classifier1.py
 │
 ├── model.p
 │
 ├── test_vision.py
-├── train_classifier.ipynb
 ├── utils.py
 │
 └── .DS_Store

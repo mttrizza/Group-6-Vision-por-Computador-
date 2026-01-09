@@ -79,54 +79,23 @@ Progetto_VC/
 
 ## create_database.ipynb
 Scopo del notebook
-L’obiettivo di create_dataset.ipynb è:
-- leggere tutte le immagini presenti nelle cartelle del dataset
-- associare a ogni immagine la corretta etichetta (label)
-- salvare i dati in un unico file (dataset.pickle) pronto per essere utilizzato nello step successivo
+Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
 
-In pratica, questo notebook rappresenta il ponte tra i dati grezzi (raw) e la fase di training del modello.
+Nello specifico, il notebook svolge tre compiti critici:
+1) Iterazione: Scansiona il dataset organizzato in directory.
+2) Feature Extraction: Utilizza MediaPipe Hands per rilevare lo scheletro della mano in ogni immagine ed estrarre le coordinate (x, y) dei 21 punti chiave.
+3) Serializzazione: Salva le liste di feature e le relative etichette (labels) in un formato binario compresso (data.pickle), riducendo drasticamente la dimensione dei dati rispetto alle immagini originali e velocizzando il training.
 
-Prerequisiti
+Prerequisiti e Librerie
+Per l'esecuzione corretta, la struttura delle directory deve seguire la tassonomia delle classi (es. data/A, data/B, etc.). Le librerie principali sono:
+- MediaPipe: Per l'estrazione dei landmark scheletrici (il "cuore" del pre-processing).
 
-Prima di eseguire il notebook è necessario che:
+- OpenCV (cv2): Per la manipolazione delle immagini (conversione BGR -> RGB).
 
--la cartella data/ sia presente nella directory del progetto
-- il file utils.py sia nella stessa cartella del notebook
-- le immagini siano organizzate in sottocartelle, una per ogni classe
+- Pickle: Per la serializzazione degli oggetti Python.
 
-Le principali librerie utilizzate sono:
+- Matplotlib (opzionale): Per visualizzare le immagini durante il debug.
 
-- os per la gestione dei file
-- cv2 (OpenCV) per la lettura delle immagini
-- pickle per il salvataggio del dataset
-
-Struttura del notebook
-
-Il notebook è suddiviso in poche celle, ognuna con uno scopo chiaro.
-
-Cella 1 – Importazioni e setup
-In questa parte vengono importate le librerie necessarie e viene definita la directory principale dei dati (DATA_DIR).
-Qui assumiamo che tutte le immagini siano già state raccolte e organizzate correttamente. Non vengono fatti controlli particolarmente robusti sugli errori, perché abbiamo lavorato su un dataset relativamente piccolo e controllato manualmente.
-
-Cella 2 – Creazione del dataset
-Questa è la parte centrale del notebook.
-si inizializzano due liste: una per i dati (data) e una per le etichette (labels)
-si scorre ogni cartella (classe)
-
-per ogni immagine:
-
-- viene letta con OpenCV
-- viene associata la label corretta
-- viene aggiunta alle liste
-Il processo è completamente automatico, ma si basa sul fatto che la struttura delle cartelle sia corretta. Se una cartella è sbagliata, anche la label lo sarà.
-
-Cella 3 – Salvataggio del dataset
-
-Una volta completata la lettura di tutte le immagini, i dati vengono salvati in un file dataset.pickle usando la libreria pickle.
-Questo file viene poi utilizzato negli altri notebook o script per:
-
-- addestrare il classificatore
-- testare le prestazioni del modello
 
 #collect_data.py
 Lo scopo principale di collect_data.py è:

@@ -78,7 +78,7 @@ Progetto_VC/
 ### Descrizione delle cartelle e dei file principali
 
 ## create_database.ipynb
-Scopo del notebook
+####Scopo del notebook
 Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
 
 Nello specifico, il notebook svolge tre compiti critici:
@@ -86,7 +86,7 @@ Nello specifico, il notebook svolge tre compiti critici:
 2) Feature Extraction: Utilizza MediaPipe Hands per rilevare lo scheletro della mano in ogni immagine ed estrarre le coordinate (x, y) dei 21 punti chiave.
 3) Serializzazione: Salva le liste di feature e le relative etichette (labels) in un formato binario compresso (data.pickle), riducendo drasticamente la dimensione dei dati rispetto alle immagini originali e velocizzando il training.
 
-Prerequisiti e Librerie
+####Prerequisiti e Librerie
 Per l'esecuzione corretta, la struttura delle directory deve seguire la tassonomia delle classi (es. data/A, data/B, etc.). Le librerie principali sono:
 - MediaPipe: Per l'estrazione dei landmark scheletrici (il "cuore" del pre-processing).
 
@@ -96,6 +96,43 @@ Per l'esecuzione corretta, la struttura delle directory deve seguire la tassonom
 
 - Matplotlib (opzionale): Per visualizzare le immagini durante il debug.
 
+####Analisi della Struttura (Dettaglio Code-Level)
+Cella 1 – Configurazione dell'Ambiente Vengono definiti i percorsi e inizializzato il modello statico di MediaPipe. A differenza dello script in tempo reale, qui configuriamo MediaPipe con static_image_mode=True, ottimizzato per immagini singole ad alta precisione.
+```python
+mp_hands = mp.solutions.hands
+
+hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
+DATA_DIR = './data'
+```
+Cella 2 – Estrazione delle Feature (Core Loop)
+Questa è la sezione computazionalmente più intensa. Il codice itera su ogni sottocartella (che rappresenta una classe/lettera) e per ogni immagine esegue la conversione.
+
+Passaggi tecnici rilevanti per ogni immagine:
+
+1) Conversione Spazio Colore: MediaPipe richiede input RGB, mentre OpenCV carica in BGR.
+```python
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+```
+2) Inferenza MediaPipe: Vengono calcolati i landmark.
+```python
+results = hands.process(img_rgb)
+```
+3)Feature Extraction & Normalizzazione (Cruciale):
+Se viene rilevata una mano, non ci limitiamo a estrarre le coordinate grezze ($x, y$ rispetto ai bordi dell'immagine). Invece, viene invocata la funzione custom get_normalized_landmarks
+```python
+if results.multi_hand_landmarks:
+            hand_landmarks = results.multi_hand_landmarks[0]
+            normalized_landmarks = get_normalized_landmarks(hand_landmarks)
+            data.append(normalized_landmarks)
+            labels.append(dir_)
+```
+
+Cella 3 – Serializzazione dei Dati I dati processati vengono salvati. Questo passaggio crea un "checkpoint". Se in futuro si vuole cambiare modello di classificazione (es. passare da Random Forest a SVM o Rete Neurale), non sarà necessario riprocessare tutte le immagini, ma basterà caricare questo file pickle.
+```python
+f = open('data.pickle', 'wb')
+pickle.dump({'data': data, 'labels': labels}, f)
+f.close()
+```
 
 #collect_data.py
 Lo scopo principale di collect_data.py è:

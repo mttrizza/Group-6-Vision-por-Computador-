@@ -84,7 +84,9 @@ Progetto_VC/
 Il file utils.py contiene la logica matematica di trasformazione dei dati. La sua funzione principale, get_normalized_landmarks, agisce come un filtro intermedio tra l'estrazione grezza di MediaPipe e l'input del classificatore. L'obiettivo è rendere i dati agnostici rispetto alla posizione e alla distanza della mano, garantendo che il modello impari la forma del gesto e non la sua posizione nello spazio.
 
 #### Funzionamento Tecnico
-La funzione riceve in input l'oggetto hand_landmarks di MediaPipe e applica una pipeline di trasformazione in tre fasi:1. Conversione in Coordinate Relative (Invarianza alla Traslazione)I dati grezzi di MediaPipe sono coordinate assolute $(x, y)$ normalizzate rispetto alle dimensioni dell'immagine (0.0 - 1.0). Se usassimo questi dati direttamente, il modello imparerebbe che una mano nell'angolo in alto a sinistra è diversa da una mano nell'angolo in basso a destra, anche se fanno lo stesso gesto.Per risolvere questo problema, il codice imposta il polso (Landmark 0) come origine $(0, 0)$ del sistema cartesiano locale. Sottrae le coordinate del polso da tutti gli altri punti:
+La funzione riceve in input l'oggetto hand_landmarks di MediaPipe e applica una pipeline di trasformazione in tre fasi:
+
+1. Conversione in Coordinate Relative (Invarianza alla Traslazione)I dati grezzi di MediaPipe sono coordinate assolute (x, y) normalizzate rispetto alle dimensioni dell'immagine (0.0 - 1.0). Se usassimo questi dati direttamente, il modello imparerebbe che una mano nell'angolo in alto a sinistra è diversa da una mano nell'angolo in basso a destra, anche se fanno lo stesso gesto.Per risolvere questo problema, il codice imposta il polso (Landmark 0) come origine (0, 0) del sistema cartesiano locale. Sottrae le coordinate del polso da tutti gli altri punti:
 ```
 P'_{i} = P_{i} - P_{polso}
 ```
@@ -97,6 +99,24 @@ if index == 0:
 temp_landmark_list[index][0] = temp_landmark_list[index][0] - base_x
 temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y```
 ```
+
+2. Flattening (Appiattimento) I dati vengono convertiti da una lista di coppie bidimensionali [[x1, y1], [x2, y2]...] a un singolo vettore monodimensionale [x1, y1, x2, y2...].
+```Python
+# Appiattisci la lista usando itertools
+temp_landmark_list = list(itertools.chain.from_iterable(temp_landmark_list))
+```
+3. Normalizzazione di Scala (Invarianza alla Scala)
+La mano potrebbe essere vicina alla telecamera (coordinate grandi) o lontana (coordinate piccole). Per rendere il gesto riconoscibile indipendentemente dalla distanza, i valori vengono normalizzati dividendo tutto per il valore assoluto massimo presente nel vettore. Questo costringe tutti i dati a rimanere in un range compreso tra $-1$ e $1$.
+```Python
+# Normalizza tra -1 e 1
+max_value = max(list(map(abs, temp_landmark_list)))
+
+def normalize_(n):
+    return n / max_value if max_value != 0 else 0
+
+temp_landmark_list = list(map(normalize_, temp_landmark_list))
+```
+
 ### create_database.ipynb
 #### Scopo del notebook
 Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
@@ -154,7 +174,59 @@ pickle.dump({'data': data, 'labels': labels}, f)
 f.close()
 ```
 
-#collect_data.py
+## train_classifier.ipynb
+#### Scopo del notebook
+In questo script avviene la transizione dai dati geometrici (le coordinate dei landmark estratte nel passaggio precedente, create_database.ipynb) alla creazione di un modello decisionale capace di classificare nuovi input in tempo reale.
+
+L'obiettivo è addestrare un algoritmo di Apprendimento Supervisionato affinché impari ad associare specifici pattern di coordinate (feature) alle lettere corrispondenti (label).
+
+#### Librerie Utilizzate
+- Scikit-learn (sklearn): La libreria standard de facto per il ML in Python. Utilizzata per la gestione dei dataset, la creazione del modello e il calcolo delle metriche.
+- Pickle & NumPy: Per la gestione efficiente dei dati serializzati e delle operazioni matriciali.
+
+#### Analisi del Flusso (Dettaglio Tecnico)
+Celle 1 & 2 – Caricamento e Preparazione Dati Il notebook inizia caricando il file dataset.pickle generato nella fase precedente. Le liste Python vengono immediatamente convertite in NumPy Arrays che sono ottimizzati per i calcoli vettoriali richiesti dagli algoritmi di Scikit-learn, offrendo prestazioni superiori rispetto alle liste standard.
+
+
+Cella 3 – Data Splitting e Addestramento (Il Core) Questa cella esegue tre operazioni critiche per la validità scientifica del progetto:
+
+1)Partitioning (Train/Test Split): Il dataset viene diviso in due sottoinsiemi disgiunti:
+   - Training Set (80%): Usato dal modello per imparare le regole.
+   - Test Set (20%): Usato per valutare le prestazioni su dati "mai visti prima".
+```python
+x_train, x_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, shuffle=True, stratify=labels)
+```
+
+2) Selezione del Modello: È stato scelto il Random Forest Classifier.
+Motivazione: È un metodo "Ensemble" che costruisce una moltitudine di alberi decisionali. È particolarmente adatto per questo progetto perché gestisce bene dataset con molte feature (42 coordinate totali) ed è robusto contro l'overfitting (il rischio di imparare "a memoria" invece di generalizzare).
+Valutazione (Accuracy): Dopo l'addestramento (.fit), il modello genera predizioni sul Test Set. L'accuratezza (accuracy_score) ci fornisce una metrica percentuale affidabile sulla capacità del modello di generalizzare.
+```python
+model = RandomForestClassifier()
+model.fit(x_train, y_train)
+# Fai una prova sui dati di test per vedere quanto è bravo
+y_predict = model.predict(x_test)
+# Calcola l'accuratezza
+score = accuracy_score(y_predict, y_test)
+```
+Accuratezza del modello: 99.26%.
+
+Cella 4 – Serializzazione del Modello Una volta verificata un'accuratezza soddisfacente (tipicamente > 95%), il modello addestrato viene salvato nel file model.p. Questo file contiene l'intero oggetto Random Forest (con tutti i suoi alberi decisionali e le soglie matematiche calcolate) e sarà l'unico file necessario per lo script di inferenza in tempo reale (inference_classifier.py).
+```python
+f = open('model.p', 'wb')
+pickle.dump({'model': model}, f)
+f.close()
+```
+
+
+
+
+
+
+
+
+
+
+##collect_data.py
 Lo scopo principale di collect_data.py è:
 
 - acquisire immagini da una sorgente (ad esempio webcam)

@@ -117,7 +117,7 @@ def normalize_(n):
 temp_landmark_list = list(map(normalize_, temp_landmark_list))
 ```
 
-### create_database.ipynb
+## create_database.ipynb
 #### Scopo del notebook
 Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
 
@@ -174,7 +174,7 @@ pickle.dump({'data': data, 'labels': labels}, f)
 f.close()
 ```
 
-### train_classifier.ipynb
+## train_classifier.ipynb
 #### Scopo del notebook
 In questo script avviene la transizione dai dati geometrici (le coordinate dei landmark estratte nel passaggio precedente, create_database.ipynb) alla creazione di un modello decisionale capace di classificare nuovi input in tempo reale.
 
@@ -217,7 +217,7 @@ pickle.dump({'model': model}, f)
 f.close()
 ```
 
-### collect_data.py
+## collect_data.py
 #### Motivazione e necessità dello script
 Durante le fasi preliminari del progetto, è stato tentato l'addestramento utilizzando esclusivamente la fusione di due dataset pubblici preesistenti. Tuttavia, i test iniziali hanno evidenziato due criticità fondamentali:
 1)Eterogeneità dei dati: I dataset originali presentavano condizioni di illuminazione, sfondi e angolazioni troppo diverse rispetto all'ambiente operativo reale, portando a una scarsa capacità di generalizzazione del modello (Domain Shift).
@@ -308,12 +308,37 @@ def run_voice_thread(text):
 ```
 Lanciando il thread con t.start(), il sistema operativo crea un nuovo binario di esecuzione per la voce. Il ciclo principale del video (while True) continua quindi a girare a 30 FPS senza interruzioni, mentre in "sottofondo" il motore TTS (Text-to-Speech) pronuncia la frase.
 
-----------------------------di di parlare anche della funzione speak_function
+---------------------------------------------di di parlare anche della funzione speak_function
 
 #### Il Motore NLP (Natural Language Processing)
 Infine, per supportare la funzionalità di "Suggeritore Intelligente", è stato implementato un motore NLP leggero basato su dizionario. La scelta di non utilizzare reti neurali pesanti (come LSTM o Transformers) per questa task è dettata dalla necessità di mantenere bassa la latenza.
 
-Il dizionario DICCIONARIO funge da Knowledge Base statica. La funzione get_suggestions_list esegue un'operazione di string-matching ottimizzata sull'ultima parola parziale digitata:
+Il dizionario "DICCIONARIO" funge da Knowledge Base statica. La funzione get_suggestions_list esegue un'operazione di string-matching ottimizzata sull'ultima parola parziale digitata:
+```python
+def get_suggestions_list(current_sentence):
+    if not current_sentence: return []
+    parts = current_sentence.split(" ")
+    last_fragment = parts[-1]
+    if len(last_fragment) == 0: return [] 
+    matches = []
+    for word in DICCIONARIO:
+        if word.startswith(last_fragment) and word != last_fragment:
+            matches.append(word)
+            if len(matches) >= 3: break 
+    return matches
+```
+Questo design permette di ottenere suggerimenti istantanei (complessità computazionale minima) che si aggiornano frame per frame mentre l'utente compone il gesto.
+
+
+Il nucleo operativo dello script è incapsulato in un ciclo infinito (while True), che gestisce la sincronizzazione tra l'acquisizione del mondo reale (Webcam) e il rendering dell'informazione digitale (GUI).
+#### Acquisizione e Normalizzazione del Flusso Video
+All'inizio di ogni iterazione, il sistema acquisisce il frame grezzo dalla telecamera. Tuttavia, prima di qualsiasi elaborazione, vengono eseguite due operazioni critiche di pre-processing:
+1) Conversione Spazio Colore: MediaPipe, essendo addestrato su dataset RGB, richiede questo formato, mentre OpenCV acquisisce nativamente in BGR.
+2) Mirroring (Effetto Specchio):Questa operazione è fondamentale per l'Usabilità (UX). Senza il ribaltamento orizzontale (flip), muovere la mano a destra provocherebbe un movimento a sinistra sullo schermo, creando confusione all'utente.
+
+#### 
+
+
 
 
 

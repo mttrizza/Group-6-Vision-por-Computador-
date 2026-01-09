@@ -39,6 +39,13 @@ Progetto_VC/
 │
 ├── __pycache__/
 │
+├── inference_classifier.py
+│
+├── model.p
+│
+├── test_vision.py
+├── utils.py
+│
 ├── create_dataset.ipynb
 ├── train_classifier.ipynb
 │
@@ -64,12 +71,6 @@ Progetto_VC/
 │   │
 │   └── new_data/
 │
-├── inference_classifier.py
-│
-├── model.p
-│
-├── test_vision.py
-├── utils.py
 │
 └── .DS_Store
 

@@ -174,7 +174,7 @@ pickle.dump({'data': data, 'labels': labels}, f)
 f.close()
 ```
 
-## train_classifier.ipynb
+### train_classifier.ipynb
 #### Scopo del notebook
 In questo script avviene la transizione dai dati geometrici (le coordinate dei landmark estratte nel passaggio precedente, create_database.ipynb) alla creazione di un modello decisionale capace di classificare nuovi input in tempo reale.
 
@@ -217,7 +217,7 @@ pickle.dump({'model': model}, f)
 f.close()
 ```
 
-## collect_data.py
+### collect_data.py
 #### Motivazione e necessità dello script
 Durante le fasi preliminari del progetto, è stato tentato l'addestramento utilizzando esclusivamente la fusione di due dataset pubblici preesistenti. Tuttavia, i test iniziali hanno evidenziato due criticità fondamentali:
 1)Eterogeneità dei dati: I dataset originali presentavano condizioni di illuminazione, sfondi e angolazioni troppo diverse rispetto all'ambiente operativo reale, portando a una scarsa capacità di generalizzazione del modello (Domain Shift).
@@ -257,19 +257,64 @@ cv2.imwrite(os.path.join(folder_path, file_name), frame)
 ```
 
 ## inference_classifier.py
-#### Infrastruttura e Sottosistemi di Supporto
-Questo script non è un semplice esecutore sequenziale, ma un sistema che integra diverse tecnologie asincrone.
+#### L'Infrastruttura Software e i Motori di Supporto
+Lo script inference_classifier.py non agisce come un semplice esecutore lineare, ma si configura come un hub di integrazione che orchestra simultaneamente visione artificiale, interfacce grafiche avanzate, sintesi vocale e logica predittiva.
 
-1. Gestione delle Dipendenze e Importazioni
-Il sistema si basa su uno stack tecnologico ibrido:
+Per superare i limiti nativi delle singole librerie (come la mancanza di supporto alla trasparenza in OpenCV o le operazioni bloccanti dell'audio), è stato necessario implementare un layer di infrastruttura custom prima di entrare nel ciclo principale di elaborazione.
 
-Computer Vision: cv2 (OpenCV) per la gestione dei frame e mediapipe per l'estrazione scheletrica.
+#### Il Motore Grafico Avanzato (Alpha Blending)
+Una delle sfide nello sviluppo di interfacce moderne con OpenCV è la gestione della trasparenza. OpenCV gestisce le immagini come matrici di pixel BGR (Blue-Green-Red) opachi. Per visualizzare icone moderne (come il microfono) con bordi morbidi e sfondi trasparenti, è stata implementata la funzione overlay_transparent.
 
-Machine Learning: pickle e numpy per caricare il modello serializzato e gestire l'algebra lineare.
+Questa funzione esegue un'operazione matematica nota come Alpha Blending. Invece di sovrascrivere brutalmente i pixel del video con quelli dell'icona (che risulterebbe in un rettangolo nero attorno all'immagine), il codice calcola una media ponderata per ogni pixel.
 
-Interfaccia Utente Avanzata: PIL (Pillow) viene introdotto per superare i limiti di OpenCV nel rendering di font TrueType (necessari per caratteri speciali come 'Ñ' o '¿') e numpy per la manipolazione pixel-by-pixel delle icone trasparenti.
+Analizzando il codice, vediamo prima la separazione dei canali:
+```python
+# Separa i canali: BGR (colore) e Alpha (trasparenza)
+overlay_img = overlay_resized[:, :, :3] 
+overlay_mask = overlay_resized[:, :, 3:] / 255.0
+```
+Successivamente, viene calcolata la maschera inversa per lo sfondo:
+```python
+background_mask = 1.0 - overlay_mask
+```
+Infine, avviene la fusione matriciale vera e propria:
+```python
+# Fonde le immagini: (Colore Icona * Alpha) + (Sfondo * (1 - Alpha))
+blended_roi = (overlay_img * overlay_mask + roi * background_mask).astype(np.uint8)
+```
+Questa singola riga di codice vettoriale permette di ottenere un'interfaccia utente fluida.
 
-Concorrenza: threading è cruciale per evitare che la sintesi vocale (TTS) blocchi il flusso video (freeze), mantenendo il sistema in real-time.
+#### Rendering del Testo Unicode (Il Ponte OpenCV-Pillow)
+Un'altra limitazione critica di OpenCV è il mancato supporto ai set di caratteri estesi (Unicode). Funzioni standard come cv2.putText non sono in grado di renderizzare caratteri come la Ñ spagnola o il punto di domanda invertito ¿.
+Per risolvere il problema, è stata creata la funzione wrapper put_text_utf8. Questa funzione agisce come un ponte tra due librerie grafiche diverse:
+1) Converte il frame video da formato OpenCV (array NumPy) a formato Pillow (PIL Image):
+```python
+img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+```
+2)Utilizza il motore di rendering di Pillow per disegnare il testo usando un font TrueType (arial.ttf), che supporta nativamente tutti i glifi internazionali.
+
+3)Riconverte l'immagine processata nel formato BGR di OpenCV per poterla mostrare a video.
+
+Questo approccio ibrido garantisce che l'interfaccia utente sia linguisticamente corretta senza sacrificare le prestazioni della pipeline video.
+
+#### Gestione Asincrona dell'Audio (Multithreading)
+L'interazione uomo-macchina richiede feedback immediati. Tuttavia, la libreria di sintesi vocale pyttsx3 opera in modalità bloccante: quando il comando engine.say() viene eseguito, il processore attende che la frase sia finita prima di passare all'istruzione successiva. In un contesto video, questo causerebbe il "congelamento" della webcam per diversi secondi ogni volta che il computer parla.
+
+Per mantenere il sistema Real-Time, è stata introdotta l'esecuzione concorrente tramite il modulo threading. La funzione run_voice_thread incapsula la logica vocale in un processo parallelo:
+```python
+def run_voice_thread(text):
+    t = threading.Thread(target=speak_function, args=(text, VOICE_ID_MANUALE))
+    t.start()
+```
+Lanciando il thread con t.start(), il sistema operativo crea un nuovo binario di esecuzione per la voce. Il ciclo principale del video (while True) continua quindi a girare a 30 FPS senza interruzioni, mentre in "sottofondo" il motore TTS (Text-to-Speech) pronuncia la frase.
+
+----------------------------di di parlare anche della funzione speak_function
+
+#### Il Motore NLP (Natural Language Processing)
+Infine, per supportare la funzionalità di "Suggeritore Intelligente", è stato implementato un motore NLP leggero basato su dizionario. La scelta di non utilizzare reti neurali pesanti (come LSTM o Transformers) per questa task è dettata dalla necessità di mantenere bassa la latenza.
+
+Il dizionario DICCIONARIO funge da Knowledge Base statica. La funzione get_suggestions_list esegue un'operazione di string-matching ottimizzata sull'ultima parola parziale digitata:
+
 
 
 

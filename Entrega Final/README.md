@@ -79,7 +79,7 @@ Progetto_VC/
 ### Descrizione delle cartelle e dei file principali
 
 ## create_database.ipynb
-####Scopo del notebook
+#### Scopo del notebook
 Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
 
 Nello specifico, il notebook svolge tre compiti critici:
@@ -87,7 +87,7 @@ Nello specifico, il notebook svolge tre compiti critici:
 2) Feature Extraction: Utilizza MediaPipe Hands per rilevare lo scheletro della mano in ogni immagine ed estrarre le coordinate (x, y) dei 21 punti chiave.
 3) Serializzazione: Salva le liste di feature e le relative etichette (labels) in un formato binario compresso (data.pickle), riducendo drasticamente la dimensione dei dati rispetto alle immagini originali e velocizzando il training.
 
-####Prerequisiti e Librerie
+#### Prerequisiti e Librerie
 Per l'esecuzione corretta, la struttura delle directory deve seguire la tassonomia delle classi (es. data/A, data/B, etc.). Le librerie principali sono:
 - MediaPipe: Per l'estrazione dei landmark scheletrici (il "cuore" del pre-processing).
 
@@ -97,7 +97,7 @@ Per l'esecuzione corretta, la struttura delle directory deve seguire la tassonom
 
 - Matplotlib (opzionale): Per visualizzare le immagini durante il debug.
 
-####Analisi della Struttura (Dettaglio Code-Level)
+#### Analisi della Struttura (Dettaglio Code-Level)
 Cella 1 – Configurazione dell'Ambiente Vengono definiti i percorsi e inizializzato il modello statico di MediaPipe. A differenza dello script in tempo reale, qui configuriamo MediaPipe con static_image_mode=True, ottimizzato per immagini singole ad alta precisione.
 ```python
 mp_hands = mp.solutions.hands

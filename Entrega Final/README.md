@@ -1,43 +1,48 @@
-Buongiorno prof siamo Mattia Rizza e Riccardo Belletti e questo è il nostro progetto finale di Vision por Computador
+# Buenos días profesor, somos Mattia Rizza y Riccardo Belletti y este es nuestro proyecto final de Visión por Computador
 
-L’obiettivo del progetto è stato applicare in modo pratico i concetti visti a lezione volendo creare un vero e proprio traduttore per la lingua dei segni.
-Il progetto non nasce come un lavoro di ricerca avanzata, ma come un esercizio completo e realistico.
-Abbiamo preso un'idea che potrebbe sembrare banale inizialmente, ci abbiamo messo del nostro e siamo riusciti a tirare fuori un bel programma che si potrebbe realmente usare per aiutare le persone con questa disabilità.
-Lanciato il programma si aprirà il video e l'utente vedrà che ci troviamo in modalità traduttore, in questa modalità l'utente potrà esercitarsi ad imparare la lingua dei segni spagnola  e gli altri simboli che abbiamo aggiunto per implementare delle azioni.
-Una volta che l'utente decide di voler scrivere un messaggio potrà fare il segno con le mani per entrare nella modalità scrittura, dentro questa modalità  l'utente potrà comporre  un qualsiasi messaggio lettera per lettera e, una volta concluso, potrà mettere il dito sull'icona del microfono per far pronuciare al computer la frase composta.
-Per velocizzare la scrittura abbiamo aggiunto una funzionalità che ti permette di vedere a schermo delle parole consigliate mentre stai scrivendo, e quindi, se per esempio stai scrivendo "pro" verrano fuori alcune parole  come "proyecto" e mettendoci il dito sopra completerà la parola.
-Oltre ai segni per scrivere le lettere, noi abbiamo aggiunto al nostro dataset altri 6 segni per fare le seguenti azioni:
-1) entrare e uscire dalla modalità scrittura
-2) cancellare tutta la frase scritta in modalità scrittura
-3) cancellare solo l'ultima lettera scritta
-4) aggiungere uno spazio nella frase
-5) aggiungere il punto di domanda di apertura
-6) aggiungere il punto di domanda di chiusura
+[Link Projecto y Video y Dataset](https://alumnosulpgc-my.sharepoint.com/:f:/g/personal/mattia_rizza101_alu_ulpgc_es/IgC-0DDnFtsgSYzWowwpVGCvAVrgFpJ8NdjnmPI-oWncQes?e=cIqijs)
 
-Qui di seguito è possibile vedere la legenda con tutti i segni utilizzabili.
-[magari qui mettiamo l'immagine dei vari segni con le corrispettive lettere]
+El objetivo del proyecto ha sido aplicar de manera práctica los conceptos vistos en clase queriendo crear un verdadero traductor para la **lengua de signos**.  
+El proyecto no nace como un trabajo de investigación avanzada, sino como un ejercicio completo y realista. Partimos de una idea que podría parecer banal inicialmente, le hemos añadido nuestro *toque personal* y hemos conseguido sacar un buen programa que realmente se podría usar para ayudar a las personas con esta *discapacidad*.  
 
----
+Al lanzar el programa se abrirá el **vídeo** y el usuario verá que nos encontramos en modo traductor; en este modo el usuario podrá practicar para **aprender la lengua de signos española** y los otros símbolos que hemos añadido para implementar acciones.  
+Una vez que el usuario decide que quiere escribir un mensaje, podrá hacer el **gesto** 🤟 con las manos para entrar en el modo escritura; dentro de este modo el usuario podrá **componer cualquier mensaje letra por letra** y, una vez terminado, podrá poner el dedo sobre el icono del **micrófono** para hacer que el ordenador **pronuncie** la frase compuesta.  
 
-## Idea generale del progetto
+Para **acelerar la escritura** hemos añadido una funcionalidad que te permite ver en pantalla **palabras recomendadas** mientras estás escribiendo, y por lo tanto, si *por ejemplo* estás escribiendo "pro" aparecerán algunas palabras como "proyecto" y poniendo el dedo encima completará la palabra.  
 
-L’idea di base è stata quello di mixare alcuni **dataset di immagini organizzati in classi** trovati su Kaggle e poi integrati con delle immagini fatte da noi, sulle lettere che il nostro programma faceva fatica a riconoscere correttamente.
+Además de los gestos para escribir las letras, nosotros hemos añadido a nuestro dataset otros **6 gestos** para realizar las siguientes acciones:
 
-In particolare:
-- abbiamo raccolto immagini grezze (raw data) che erano già organizzate in cartelle
-- abbiamo scritto script Python per automatizzare parte del processo
-- abbiamo usato un notebook Jupyter per esplorare e verificare il dataset
+- entrar y salir del modo escritura
+- borrar toda la frase escrita en modo escritura
+- borrar solo la última letra escrita
+- añadir un espacio en la frase
+- añadir el signo de interrogación de apertura
+- añadir el signo de interrogación de cierre
+  
+A continuación es posible ver la leyenda con todos los gestos utilizables. 
 
----
 
-## Struttura del progetto
+<img src="img/Legenda.jpeg" width="400" />
 
-La struttura principale del repository è la seguente:
+--- 
 
+## Idea general del proyecto
+
+La idea base ha sido mezclar algunos datasets de imágenes organizados en clases encontrados en **Kaggle** y luego integrarlos con imágenes hechas por *nosotros*, en aquellas letras que nuestro programa tenía *dificultades* para reconocer correctamente.
+
+En particular:
+
+- hemos recopilado imágenes en bruto (raw data) que ya estaban organizadas en carpetas
+- hemos escrito scripts de Python para automatizar parte del proceso
+- hemos usado un notebook de Jupyter para explorar y verificar el dataset
+
+## Estructura del proyecto
+
+La estructura principal del repositorio es la siguiente:
 ```
 Progetto_VC/
 │
-├── __pycache__/
+├── pycache/
 │
 ├── inference_classifier.py
 │
@@ -50,65 +55,75 @@ Progetto_VC/
 ├── train_classifier.ipynb
 │
 ├── data/
-│   ├── collect_data.py
-│   │
-│   ├── raw/
-│   │   ├── ABRIR_INTERROGACION/
-│   │   ├── BORRAR_LETRA/
-│   │   ├── BORRAR_TODO/
-│   │   ├── CERRAR_INTERROGACION/
-│   │   ├── ESPACIO/
-│   │   ├── F/
-│   │   ├── H/
-│   │   ├── MODO_ESCRITURA/
-│   │   ├── S/
-│   │   ├── T/
-│   │   ├── U/
-│   │   ├── V/
-│   │   ├── W/
-│   │   ├── X/
-│   │   └── Y/
-│   │
-│   └── new_data/
+│ ├── collect_data.py
+│ │
+│ ├── raw/
+│ │ ├── ABRIR_INTERROGACION/
+│ │ ├── BORRAR_LETRA/
+│ │ ├── BORRAR_TODO/
+│ │ ├── CERRAR_INTERROGACION/
+│ │ ├── ESPACIO/
+│ │ ├── F/
+│ │ ├── H/
+│ │ ├── MODO_ESCRITURA/
+│ │ ├── S/
+│ │ ├── T/
+│ │ ├── U/
+│ │ ├── V/
+│ │ ├── W/
+│ │ ├── X/
+│ │ └── Y/
+│ │
+│ └── new_data/
 │
 │
 └── .DS_Store
-
 ```
 
-## Descrizione delle cartelle e dei file principali
 
-### utils.py 
+## Descripción de las carpetas y de los archivos principales
 
-#### Scopo del modulo
-Il file utils.py contiene la logica matematica di trasformazione dei dati. La sua funzione principale, get_normalized_landmarks, agisce come un filtro intermedio tra l'estrazione grezza di MediaPipe e l'input del classificatore. L'obiettivo è rendere i dati agnostici rispetto alla posizione e alla distanza della mano, garantendo che il modello impari la forma del gesto e non la sua posizione nello spazio.
+### utils.py
 
-#### Funzionamento Tecnico
-La funzione riceve in input l'oggetto hand_landmarks di MediaPipe e applica una pipeline di trasformazione in tre fasi:
+**Objetivo del módulo**
+El archivo **utils.py** contiene la *lógica matemática de transformación de los datos*. Su función principal, *get_normalized_landmarks*, actúa como un filtro intermedio entre la extracción en bruto de *+MediaPipe** y la entrada del clasificador.   
+El *objetivo* es hacer que los datos sean agnósticos respecto a la posición y a la distancia de la mano, garantizando que el modelo aprenda la forma del gesto y no su posición en el espacio.
 
-1. Conversione in Coordinate Relative (Invarianza alla Traslazione)I dati grezzi di MediaPipe sono coordinate assolute (x, y) normalizzate rispetto alle dimensioni dell'immagine (0.0 - 1.0). Se usassimo questi dati direttamente, il modello imparerebbe che una mano nell'angolo in alto a sinistra è diversa da una mano nell'angolo in basso a destra, anche se fanno lo stesso gesto.Per risolvere questo problema, il codice imposta il polso (Landmark 0) come origine (0, 0) del sistema cartesiano locale. Sottrae le coordinate del polso da tutti gli altri punti:
+**Funcionamiento técnico**  
+La función recibe como entrada el objeto **hand_landmarks** de MediaPipe y aplica una pipeline de transformación en tres fases:
+
+**1. Conversión a coordenadas relativas (invarianza a la traslación)**  
+Los datos en bruto de MediaPipe son coordenadas absolutas (x, y) normalizadas respecto a las dimensiones de la imagen (0.0 - 1.0). Si usáramos estos datos directamente, el modelo aprendería que una mano en la esquina superior izquierda es diferente de una mano en la esquina inferior derecha, aunque hagan el mismo gesto. Para resolver este problema, el código establece la muñeca (Landmark 0) como origen (0, 0) del sistema cartesiano local. Resta las coordenadas de la muñeca a todos los demás puntos:
+
+```python
+P'{i} = P{i} - P_{polso}
 ```
-P'_{i} = P_{i} - P_{polso}
-```
-```Python
-# Trova le coordinate del polso (punto 0) per usarle come origine
+Trova le coordinate del polso (punto 0) per usarle come origine
+```python
 if index == 0:
     base_x, base_y = landmark_point[0], landmark_point[1]
-
-# Sottrai la base a tutti i punti (Traslazione dell'origine)
-temp_landmark_list[index][0] = temp_landmark_list[index][0] - base_x
-temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y```
 ```
 
-2. Flattening (Appiattimento) I dati vengono convertiti da una lista di coppie bidimensionali [[x1, y1], [x2, y2]...] a un singolo vettore monodimensionale [x1, y1, x2, y2...].
-```Python
-# Appiattisci la lista usando itertools
+Sottrai la base a tutti i punti (Traslazione dell'origine)
+```python
+temp_landmark_list[index][0] = temp_landmark_list[index][0] - base_x
+temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y
+```
+
+
+**2. Flattening (aplanamiento)**  
+Los datos se convierten de una lista de parejas bidimensionales [[x1, y1], [x2, y2]...] a un único vector unidimensional [x1, y1, x2, y2...].
+
+Appiattisci la lista usando itertools
+```python
 temp_landmark_list = list(itertools.chain.from_iterable(temp_landmark_list))
 ```
-3. Normalizzazione di Scala (Invarianza alla Scala)
-La mano potrebbe essere vicina alla telecamera (coordinate grandi) o lontana (coordinate piccole). Per rendere il gesto riconoscibile indipendentemente dalla distanza, i valori vengono normalizzati dividendo tutto per il valore assoluto massimo presente nel vettore. Questo costringe tutti i dati a rimanere in un range compreso tra $-1$ e $1$.
-```Python
-# Normalizza tra -1 e 1
+
+**3. Normalización de escala (invarianza a la escala)**
+La **mano** puede estar cerca de la cámara (coordenadas grandes) o lejos (coordenadas pequeñas). Para hacer que el gesto sea reconocible independientemente de la distancia, los valores se normalizan dividiendo todo por el valor absoluto máximo presente en el vector. Esto fuerza a que todos los datos queden dentro de un rango entre − 1 y 1.
+
+Normalizza tra -1 e 1
+```python
 max_value = max(list(map(abs, temp_landmark_list)))
 
 def normalize_(n):
@@ -117,48 +132,55 @@ def normalize_(n):
 temp_landmark_list = list(map(normalize_, temp_landmark_list))
 ```
 
-## create_database.ipynb
-#### Scopo del notebook
-Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
+### create_database.ipynb
 
-Nello specifico, il notebook svolge tre compiti critici:
-1) Iterazione: Scansiona il dataset organizzato in directory.
-2) Feature Extraction: Utilizza MediaPipe Hands per rilevare lo scheletro della mano in ogni immagine ed estrarre le coordinate (x, y) dei 21 punti chiave.
-3) Serializzazione: Salva le liste di feature e le relative etichette (labels) in un formato binario compresso (data.pickle), riducendo drasticamente la dimensione dei dati rispetto alle immagini originali e velocizzando il training.
+**Objetivo del notebook**  
+Este script constituye la fase de **Pre-processing** y **Feature Extraction** de la pipeline de Computer Vision. El objetivo no es simplemente leer las imágenes, sino transformar los datos no estructurados (píxeles de las imágenes raw) en datos estructurados (coordenadas geométricas de los landmark de la mano), listos para el entrenamiento de un clasificador (por ejemplo Random Forest).
 
-#### Prerequisiti e Librerie
-Per l'esecuzione corretta, la struttura delle directory deve seguire la tassonomia delle classi (es. data/A, data/B, etc.). Le librerie principali sono:
-- MediaPipe: Per l'estrazione dei landmark scheletrici (il "cuore" del pre-processing).
+En concreto, el notebook realiza tres tareas críticas:
 
-- OpenCV (cv2): Per la manipolazione delle immagini (conversione BGR -> RGB).
+1. **Iteración**: Escanea el dataset organizado en directorios.  
+2. **Feature Extraction**: Utiliza MediaPipe Hands para detectar el esqueleto de la mano en cada imagen y extraer las coordenadas (x, y) de los 21 puntos clave.  
+3. **Serialización**: Guarda las listas de features y las etiquetas (labels) en un formato binario comprimido (data.pickle), reduciendo drásticamente el tamaño de los datos respecto a las imágenes originales y acelerando el training.
 
-- Pickle: Per la serializzazione degli oggetti Python.
+**Requisitos previos y librerías**
+Para la ejecución correcta, la estructura de directorios debe seguir la taxonomía de clases (por ejemplo data/A, data/B, etc.). Las librerías principales son:
 
-- Matplotlib (opzionale): Per visualizzare le immagini durante il debug.
+- MediaPipe: para la extracción de los landmark esqueléticos (el “corazón” del pre-processing).
+- OpenCV (cv2): para la manipulación de imágenes (conversión BGR -> RGB).
+- Pickle: para la serialización de objetos Python.
+- Matplotlib (opcional): para visualizar las imágenes durante el debug.
 
-#### Analisi della Struttura (Dettaglio Code-Level)
-Cella 1 – Configurazione dell'Ambiente Vengono definiti i percorsi e inizializzato il modello statico di MediaPipe. A differenza dello script in tempo reale, qui configuriamo MediaPipe con static_image_mode=True, ottimizzato per immagini singole ad alta precisione.
+**Análisis de la estructura (detalle a nivel de código)**  
+Celda 1 – **Configuración del entorno**
+Se definen las rutas y se inicializa el modelo estático de MediaPipe. A diferencia del script en tiempo real, aquí configuramos MediaPipe con static_image_mode=True, optimizado para imágenes individuales con alta precisión.
+
 ```python
 mp_hands = mp.solutions.hands
 
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 DATA_DIR = './data'
 ```
-Cella 2 – Estrazione delle Feature (Core Loop)
-Questa è la sezione computazionalmente più intensa. Il codice itera su ogni sottocartella (che rappresenta una classe/lettera) e per ogni immagine esegue la conversione.
 
-Passaggi tecnici rilevanti per ogni immagine:
+Celda 2 – **Extracción de las features (Core Loop)**  
+Esta es la sección computacionalmente más intensa. El código itera sobre cada subcarpeta (que representa una clase/letra) y para cada imagen ejecuta la conversión.
 
-1) Conversione Spazio Colore: MediaPipe richiede input RGB, mentre OpenCV carica in BGR.
+Pasos técnicos relevantes para cada imagen:
+
+1. **Conversión de espacio de color**: MediaPipe requiere entrada RGB, mientras que OpenCV carga en BGR.
 ```python
 img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 ```
-2) Inferenza MediaPipe: Vengono calcolati i landmark.
+
+2. **Inferencia MediaPipe: se calculan los landmark.**
+
 ```python
 results = hands.process(img_rgb)
 ```
-3)Feature Extraction & Normalizzazione (Cruciale):
-Se viene rilevata una mano, non ci limitiamo a estrarre le coordinate grezze ($x, y$ rispetto ai bordi dell'immagine). Invece, viene invocata la funzione custom get_normalized_landmarks
+
+3. **Feature Extraction & Normalización** (crucial):
+si se detecta una mano, no nos limitamos a extraer coordenadas crudas (x, y respecto a los bordes de la imagen). En su lugar, se invoca la función *custom get_normalized_landmarks*
+
 ```python
 if results.multi_hand_landmarks:
             hand_landmarks = results.multi_hand_landmarks[0]
@@ -167,153 +189,198 @@ if results.multi_hand_landmarks:
             labels.append(dir_)
 ```
 
-Cella 3 – Serializzazione dei Dati I dati processati vengono salvati. Questo passaggio crea un "checkpoint". Se in futuro si vuole cambiare modello di classificazione (es. passare da Random Forest a SVM o Rete Neurale), non sarà necessario riprocessare tutte le immagini, ma basterà caricare questo file pickle.
+Celda 3 – **Serialización de los datos**
+Los datos procesados se guardan. Este paso crea un “checkpoint”. Si en el futuro se quiere cambiar el modelo de clasificación (por ejemplo pasar de Random Forest a SVM o Red Neuronal), no será necesario reprocesar todas las imágenes, sino que bastará con cargar este archivo pickle.
+
 ```python
 f = open('data.pickle', 'wb')
 pickle.dump({'data': data, 'labels': labels}, f)
 f.close()
 ```
 
-## train_classifier.ipynb
-#### Scopo del notebook
-In questo script avviene la transizione dai dati geometrici (le coordinate dei landmark estratte nel passaggio precedente, create_database.ipynb) alla creazione di un modello decisionale capace di classificare nuovi input in tempo reale.
+### train_classifier.ipynb
 
-L'obiettivo è addestrare un algoritmo di Apprendimento Supervisionato affinché impari ad associare specifici pattern di coordinate (feature) alle lettere corrispondenti (label).
+**Objetivo del notebook**  
+En este script ocurre la **transición** desde los datos geométricos (las coordenadas de los landmark extraídas en el paso anterior, create_database.ipynb) hasta la creación de un modelo de decisión capaz de clasificar nuevas entradas en tiempo real.
 
-#### Librerie Utilizzate
-- Scikit-learn (sklearn): La libreria standard de facto per il ML in Python. Utilizzata per la gestione dei dataset, la creazione del modello e il calcolo delle metriche.
-- Pickle & NumPy: Per la gestione efficiente dei dati serializzati e delle operazioni matriciali.
+El objetivo es entrenar un algoritmo de Aprendizaje Supervisado para que aprenda a asociar patrones específicos de coordenadas (features) con las letras correspondientes (label).
 
-#### Analisi del Flusso (Dettaglio Tecnico)
-Celle 1 & 2 – Caricamento e Preparazione Dati Il notebook inizia caricando il file dataset.pickle generato nella fase precedente. Le liste Python vengono immediatamente convertite in NumPy Arrays che sono ottimizzati per i calcoli vettoriali richiesti dagli algoritmi di Scikit-learn, offrendo prestazioni superiori rispetto alle liste standard.
+**Librerías utilizadas**  
+- *Scikit-learn* (sklearn): librería estándar de facto para ML en Python. Se utiliza para la gestión del dataset, creación del modelo y cálculo de métricas.
+- *Pickle & NumPy*: para gestión eficiente de datos serializados y operaciones matriciales.
 
+**Análisis del flujo (detalle técnico)**  
+Celdas 1 & 2 – **Carga y preparación de datos**
+El notebook comienza cargando el archivo **dataset.pickle** generado en la fase anterior. Las listas Python se convierten inmediatamente en **NumPy Arrays**, optimizados para cálculos vectoriales requeridos por los algoritmos de Scikit-learn, ofreciendo prestaciones superiores respecto a listas estándar.
 
-Cella 3 – Data Splitting e Addestramento (Il Core) Questa cella esegue tre operazioni critiche per la validità scientifica del progetto:
+Celda 3 – **Data Splitting y entrenamiento** (el core)
+Esta celda ejecuta tres operaciones críticas para la validez científica del proyecto:
 
-1)Partitioning (Train/Test Split): Il dataset viene diviso in due sottoinsiemi disgiunti:
-   - Training Set (80%): Usato dal modello per imparare le regole.
-   - Test Set (20%): Usato per valutare le prestazioni su dati "mai visti prima".
+1. **Partitioning** (Train/Test Split): el dataset se divide en dos subconjuntos disjuntos:
+
+**Training Set** *(80%)*: usado por el modelo para aprender las reglas.
+**Test Set** *(20%)*: usado para evaluar el rendimiento en datos “nunca vistos antes”.
+
 ```python
 x_train, x_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, shuffle=True, stratify=labels)
 ```
 
-2) Selezione del Modello: È stato scelto il Random Forest Classifier.
-Motivazione: È un metodo "Ensemble" che costruisce una moltitudine di alberi decisionali. È particolarmente adatto per questo progetto perché gestisce bene dataset con molte feature (42 coordinate totali) ed è robusto contro l'overfitting (il rischio di imparare "a memoria" invece di generalizzare).
-Valutazione (Accuracy): Dopo l'addestramento (.fit), il modello genera predizioni sul Test Set. L'accuratezza (accuracy_score) ci fornisce una metrica percentuale affidabile sulla capacità del modello di generalizzare.
+2. **Selección del modelo:** se eligió *Random Forest Classifier*.  
+*Motivación:* es un método *“Ensemble”* que construye una multitud de árboles de decisión. Es especialmente adecuado para este proyecto porque gestiona bien datasets con muchas features *(42 coordenadas en total)* y es robusto frente al overfitting (el riesgo de aprender “de memoria” en lugar de generalizar).
+
+**Evaluación (Accuracy)**: después del entrenamiento (.fit), el modelo genera predicciones sobre el Test Set. La exactitud (accuracy_score) nos proporciona una métrica porcentual fiable sobre la capacidad del modelo para generalizar.
+
 ```python
 model = RandomForestClassifier()
 model.fit(x_train, y_train)
-# Fai una prova sui dati di test per vedere quanto è bravo
+# Haz una prueba con los datos de test para ver qué tan bueno es
 y_predict = model.predict(x_test)
-# Calcola l'accuratezza
+# Calcula la accuracy
 score = accuracy_score(y_predict, y_test)
 ```
-Accuratezza del modello: 99.26%.
+Exactitud del modelo: 99.26%.
 
-Cella 4 – Serializzazione del Modello Una volta verificata un'accuratezza soddisfacente (tipicamente > 95%), il modello addestrato viene salvato nel file model.p. Questo file contiene l'intero oggetto Random Forest (con tutti i suoi alberi decisionali e le soglie matematiche calcolate) e sarà l'unico file necessario per lo script di inferenza in tempo reale (inference_classifier.py).
+Celda 4 – **Serialización del modelo**
+Una vez verificada una exactitud satisfactoria *(típicamente > 95%)*, el **modelo entrenado** se guarda en el archivo **model.p**.  
+Este archivo contiene el objeto completo **Random Forest** (con todos sus árboles de decisión y los umbrales matemáticos calculados) y será el único archivo necesario para el script de inferencia en tiempo real (inference_classifier.py).
+
 ```python
 f = open('model.p', 'wb')
 pickle.dump({'model': model}, f)
 f.close()
 ```
 
-## collect_data.py
-#### Motivazione e necessità dello script
-Durante le fasi preliminari del progetto, è stato tentato l'addestramento utilizzando esclusivamente la fusione di due dataset pubblici preesistenti. Tuttavia, i test iniziali hanno evidenziato due criticità fondamentali:
-1)Eterogeneità dei dati: I dataset originali presentavano condizioni di illuminazione, sfondi e angolazioni troppo diverse rispetto all'ambiente operativo reale, portando a una scarsa capacità di generalizzazione del modello (Domain Shift).
+### collect_data.py
 
-2)Incompletezza delle classi: Non è stato possibile reperire un dataset esterno che coprisse perfettamente tutte le classi desiderate
+**Motivación y necesidad del script**
 
-Per risolvere queste problematiche senza dover annotare manualmente migliaia di immagini, è stato sviluppato lo script collect_data.py. Questo tool permette di integrare il dataset esistente con immagini acquisite direttamente dall'ambiente di utilizzo finale, migliorando drasticamente la robustezza del modello.
+Durante las fases preliminares del proyecto, se intentó el entrenamiento utilizando exclusivamente la fusión de dos datasets públicos preexistentes. Sin embargo, las pruebas iniciales evidenciaron dos criticidades fundamentales:
 
-#### Funzionamento Tecnico
-Lo script implementa un sistema di acquisizione on-demand. A differenza di una registrazione video continua, questo approccio permette all'utente di posizionare la mano correttamente e salvare il frame solo quando il gesto è perfetto, garantendo  qualità del dato in ingresso.
-Il funzionamento si basa su tre blocchi logici:
+1. **Heterogeneidad de los datos**: los datasets originales presentaban condiciones de iluminación, fondos y ángulos demasiado diferentes respecto al entorno operativo real, llevando a una baja capacidad de generalización del modelo (Domain Shift).
 
-1. Setup della Camera (Alta Risoluzione) Viene inizializzata la webcam con una risoluzione HD (1280x720). Utilizzare una risoluzione più alta in questa fase è cruciale per garantire che MediaPipe (nello step successivo) riceva dettagli sufficienti per estrarre i landmark con precisione.
+2. **Incompletitud de las clases:** no fue posible encontrar un dataset externo que cubriera perfectamente todas las clases deseadas.
+
+Para *resolver estas problemáticas* sin tener que anotar manualmente miles de imágenes, se desarrolló el script **collect_data.py**. Esta herramienta permite integrar el dataset existente con imágenes adquiridas directamente en el entorno de uso final, mejorando drásticamente la robustez del modelo.
+
+**Funcionamiento técnico**
+El script implementa un sistema de **adquisición on-demand**. A diferencia de una grabación de vídeo continua, este enfoque permite al usuario posicionar la mano correctamente y guardar el *frame* solo cuando el gesto es perfecto, garantizando calidad del dato de entrada.  
+El funcionamiento se basa en tres bloques lógicos:
+
+1. **Setup de la cámara** (alta resolución)
+Se inicializa la webcam con una resolución **HD (1280x720)**.  
+Usar una resolución más alta en esta fase es crucial para garantizar que MediaPipe (en el siguiente paso) reciba suficientes detalles para extraer los landmark con precisión.
+
 ```python
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 ```
-2. Gestione Dinamica delle Classi (File System) Il codice non richiede di pre-creare le cartelle manualmente. Sfruttando la libreria os, lo script verifica l'input da tastiera e gestisce automaticamente la struttura delle directory. Se l'utente preme il tasto "A", lo script controlla l'esistenza della cartella ./data/raw/A, la crea se necessario, e calcola il nome del file progressivo per evitare sovrascritture.
+
+2. **Gestión dinámica de clases** (File System)
+El código no requiere pre-crear las carpetas manualmente. Usando la librería os, el script verifica la entrada del teclado y gestiona automáticamente la estructura de directorios. Si el usuario pulsa la tecla "A", el script comprueba la existencia de la carpeta ./data/raw/A, la crea si es necesario, y calcula el nombre progresivo del archivo para evitar sobrescrituras.
+
 ```python
-# Convertiamo il codice tasto in lettera (es. 97 -> 'a' -> 'A')
+# Convertimos el código de la tecla en letra (ej. 97 -> 'a' -> 'A')
 lettera = chr(key).upper()
  
-# Gestione automatica della struttura delle cartelle
+# Gestión automática de la estructura de las carpetas
 folder_path = os.path.join(DATA_DIR, lettera)
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 ```
-3. Acquisizione e Salvataggio (I/O) Al momento della pressione del tasto, il frame corrente viene "congelato" e salvato su disco tramite OpenCV. Questo permette di popolare rapidamente le classi meno rappresentate o di aggiungerne di nuove (come i comandi gestuali personalizzati) in pochi secondi.
+
+3. **Adquisición y guardado (I/O)**
+En el momento en que se pulsa la tecla, el frame actual se *“congela”* y se guarda en disco mediante **OpenCV**. Esto permite poblar rápidamente las clases menos representadas o añadir nuevas (como los comandos gestuales personalizados) en pocos segundos.
+
 ```python
-# Conta quanti file ci sono già per non sovrascrivere
+# Cuenta cuántos archivos ya existen para no sobrescribirlos
 count = len(os.listdir(folder_path))
           
-# Salva l'immagine
+# Guarda la imagen
 file_name = f"aa{count}.jpg"
 cv2.imwrite(os.path.join(folder_path, file_name), frame)
 ```
 
-## inference_classifier.py
-#### L'Infrastruttura Software e i Motori di Supporto
-Lo script inference_classifier.py non agisce come un semplice esecutore lineare, ma si configura come un hub di integrazione che orchestra simultaneamente visione artificiale, interfacce grafiche avanzate, sintesi vocale e logica predittiva.
+### inference_classifier.py
 
-Per superare i limiti nativi delle singole librerie (come la mancanza di supporto alla trasparenza in OpenCV o le operazioni bloccanti dell'audio), è stato necessario implementare un layer di infrastruttura custom prima di entrare nel ciclo principale di elaborazione.
+**La infraestructura software y los motores de soporte**
 
-#### Il Motore Grafico Avanzato (Alpha Blending)
-Una delle sfide nello sviluppo di interfacce moderne con OpenCV è la gestione della trasparenza. OpenCV gestisce le immagini come matrici di pixel BGR (Blue-Green-Red) opachi. Per visualizzare icone moderne (come il microfono) con bordi morbidi e sfondi trasparenti, è stata implementata la funzione overlay_transparent.
+El script **inference_classifier.py** no actúa como un simple ejecutor lineal, sino que se configura como un hub de integración que orquesta simultáneamente visión artificial, interfaces gráficas avanzadas, síntesis vocal y lógica predictiva.
 
-Questa funzione esegue un'operazione matematica nota come Alpha Blending. Invece di sovrascrivere brutalmente i pixel del video con quelli dell'icona (che risulterebbe in un rettangolo nero attorno all'immagine), il codice calcola una media ponderata per ogni pixel.
+Para superar los **límites nativos** de las librerías individuales (como la falta de soporte de transparencia en OpenCV o las operaciones bloqueantes del audio), fue necesario implementar una capa de infraestructura custom antes de entrar en el ciclo principal de procesamiento.
 
-Analizzando il codice, vediamo prima la separazione dei canali:
+**El motor gráfico avanzado** *(Alpha Blending)*
+
+Uno de los retos al desarrollar interfaces modernas con **OpenCV** es la gestión de la *transparencia*. **OpenCV** gestiona las imágenes como matrices de píxeles *BGR (Blue-Green-Red)* opacos. Para visualizar iconos modernos *(como el micrófono)* con bordes suaves y fondos transparentes, se implementó la función overlay_transparent.
+
+Esta función ejecuta una operación matemática conocida como **Alpha Blending**. En lugar de sobrescribir brutalmente los píxeles del vídeo con los del icono (lo que resultaría en un rectángulo negro alrededor de la imagen), el código calcula una media ponderada para cada píxel.
+
+Analizando el código, vemos primero la separación de canales:
+
 ```python
-# Separa i canali: BGR (colore) e Alpha (trasparenza)
+# Separa los canales: BGR (color) y Alpha (transparencia)
 overlay_img = overlay_resized[:, :, :3] 
 overlay_mask = overlay_resized[:, :, 3:] / 255.0
 ```
-Successivamente, viene calcolata la maschera inversa per lo sfondo:
+
+Posteriormente se calcula la máscara inversa para el fondo:
+
 ```python
 background_mask = 1.0 - overlay_mask
 ```
-Infine, avviene la fusione matriciale vera e propria:
+
+Finalmente, ocurre la fusión matricial propiamente dicha:
+
 ```python
-# Fonde le immagini: (Colore Icona * Alpha) + (Sfondo * (1 - Alpha))
+# Fusiona las imágenes: (Color del icono * Alpha) + (Fondo * (1 - Alpha))
 blended_roi = (overlay_img * overlay_mask + roi * background_mask).astype(np.uint8)
 ```
-Questa singola riga di codice vettoriale permette di ottenere un'interfaccia utente fluida.
 
-#### Rendering del Testo Unicode (Il Ponte OpenCV-Pillow)
-Un'altra limitazione critica di OpenCV è il mancato supporto ai set di caratteri estesi (Unicode). Funzioni standard come cv2.putText non sono in grado di renderizzare caratteri come la Ñ spagnola o il punto di domanda invertito ¿.
-Per risolvere il problema, è stata creata la funzione wrapper put_text_utf8. Questa funzione agisce come un ponte tra due librerie grafiche diverse:
-1) Converte il frame video da formato OpenCV (array NumPy) a formato Pillow (PIL Image):
+Esta única línea de código vectorial permite obtener una interfaz de usuario fluida.
+
+**Renderizado de texto Unicode** (El puente *OpenCV-Pillow*)  
+
+Otra *limitación crítica* de **OpenCV** es la falta de soporte para **conjuntos de caracteres extendidos** (Unicode). Funciones estándar como *cv2.putText* no son capaces de renderizar caracteres como la **Ñ** española o el signo de interrogación invertido **¿**.  
+Para resolver el problema, se creó la función **wrapper put_text_utf8**.  
+Esta función actúa como un puente entre dos librerías gráficas distintas:
+
+1. Convierte el frame de vídeo del formato OpenCV (array NumPy) al formato Pillow (PIL Image):
+
 ```python
 img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 ```
-2)Utilizza il motore di rendering di Pillow per disegnare il testo usando un font TrueType (arial.ttf), che supporta nativamente tutti i glifi internazionali.
 
-3)Riconverte l'immagine processata nel formato BGR di OpenCV per poterla mostrare a video.
+2. Utiliza el motor de renderizado de Pillow para dibujar el texto usando una fuente TrueType (arial.ttf), que soporta nativamente todos los glifos internacionales.
 
-Questo approccio ibrido garantisce che l'interfaccia utente sia linguisticamente corretta senza sacrificare le prestazioni della pipeline video.
+3. Reconvierten la imagen procesada al formato BGR de OpenCV para poder mostrarla en vídeo.
 
-#### Gestione Asincrona dell'Audio (Multithreading)
-L'interazione uomo-macchina richiede feedback immediati. Tuttavia, la libreria di sintesi vocale pyttsx3 opera in modalità bloccante: quando il comando engine.say() viene eseguito, il processore attende che la frase sia finita prima di passare all'istruzione successiva. In un contesto video, questo causerebbe il "congelamento" della webcam per diversi secondi ogni volta che il computer parla.
+Este enfoque híbrido garantiza que la interfaz de usuario sea lingüísticamente correcta sin sacrificar el rendimiento de la pipeline de vídeo.
 
-Per mantenere il sistema Real-Time, è stata introdotta l'esecuzione concorrente tramite il modulo threading. La funzione run_voice_thread incapsula la logica vocale in un processo parallelo:
+**Gestión asíncrona del audio** (*Multithreading*)  
+
+La interacción **humano-máquina** requiere feedback inmediato. Sin embargo, la librería de síntesis de voz **pyttsx3** opera en modo bloqueante: cuando se ejecuta el comando **engine.say()**, el procesador espera a que la frase termine antes de pasar a la siguiente instrucción.  
+En un contexto de vídeo, esto causaría el *“congelamiento”* de la webcam durante varios segundos cada vez que el ordenador habla.
+
+Para mantener el sistema Real-Time, se introdujo la ejecución concurrente mediante el módulo threading. La función run_voice_thread encapsula la lógica de voz en un proceso paralelo:
+
 ```python
 def run_voice_thread(text):
     t = threading.Thread(target=speak_function, args=(text, VOICE_ID_MANUALE))
     t.start()
 ```
-Lanciando il thread con t.start(), il sistema operativo crea un nuovo binario di esecuzione per la voce. Il ciclo principale del video (while True) continua quindi a girare a 30 FPS senza interruzioni, mentre in "sottofondo" il motore TTS (Text-to-Speech) pronuncia la frase.
+
+Al lanzar el hilo con **t.start()**, el sistema operativo crea un nuevo hilo de ejecución para la voz.  
+El ciclo principal del vídeo (while True) continúa por tanto girando a 30 FPS sin interrupciones, mientras que en “segundo plano” el motor **TTS (Text-to-Speech)** pronuncia la frase.
 
 ---------------------------------------------di di parlare anche della funzione speak_function
 
-#### Il Motore NLP (Natural Language Processing)
-Infine, per supportare la funzionalità di "Suggeritore Intelligente", è stato implementato un motore NLP leggero basato su dizionario. La scelta di non utilizzare reti neurali pesanti (come LSTM o Transformers) per questa task è dettata dalla necessità di mantenere bassa la latenza.
+**El motor NLP (Natural Language Processing)**
 
-Il dizionario "DICCIONARIO" funge da Knowledge Base statica. La funzione get_suggestions_list esegue un'operazione di string-matching ottimizzata sull'ultima parola parziale digitata:
+Por último, para soportar la funcionalidad de **“Sugeridor Inteligente”**, se implementó un motor **NLP** ligero basado en diccionario.  
+La elección de no utilizar redes neuronales pesadas (como LSTM o Transformers) para esta tarea está dictada por la necesidad de mantener baja la latencia.
+
+El diccionario "**DICCIONARIO**" actúa como una *Knowledge Base* estática. La función get_suggestions_list ejecuta una operación de string-matching optimizada sobre la última palabra parcial introducida:
+
 ```python
 def get_suggestions_list(current_sentence):
     if not current_sentence: return []
@@ -327,16 +394,17 @@ def get_suggestions_list(current_sentence):
             if len(matches) >= 3: break 
     return matches
 ```
-Questo design permette di ottenere suggerimenti istantanei (complessità computazionale minima) che si aggiornano frame per frame mentre l'utente compone il gesto.
 
+Este diseño permite obtener sugerencias instantáneas (complejidad computacional mínima) que se actualizan frame a frame mientras el usuario compone el gesto.
 
-Il nucleo operativo dello script è incapsulato in un ciclo infinito (while True), che gestisce la sincronizzazione tra l'acquisizione del mondo reale (Webcam) e il rendering dell'informazione digitale (GUI).
-#### Acquisizione e Normalizzazione del Flusso Video
-All'inizio di ogni iterazione, il sistema acquisisce il frame grezzo dalla telecamera. Tuttavia, prima di qualsiasi elaborazione, vengono eseguite due operazioni critiche di pre-processing:
-1) Conversione Spazio Colore: MediaPipe, essendo addestrato su dataset RGB, richiede questo formato, mentre OpenCV acquisisce nativamente in BGR.
-2) Mirroring (Effetto Specchio):Questa operazione è fondamentale per l'Usabilità (UX). Senza il ribaltamento orizzontale (flip), muovere la mano a destra provocherebbe un movimento a sinistra sullo schermo, creando confusione all'utente.
+El núcleo operativo del script está encapsulado en un **bucle infinito** (while True), que gestiona la sincronización entre la adquisición del mundo real (Webcam) y el renderizado de la información digital **(GUI)**.
 
-#### 
+**Adquisición y normalización del flujo de vídeo** 
+
+Al inicio de cada iteración, el sistema adquiere el frame bruto de la cámara. Sin embargo, antes de cualquier procesamiento, se ejecutan dos operaciones críticas de pre-processing:
+
+- **Conversión de espacio de color**: *MediaPipe*, al estar entrenado sobre datasets RGB, requiere este formato, mientras que OpenCV adquiere nativamente en BGR.
+- **Mirroring (Efecto espejo)**: esta operación es fundamental para la Usabilidad (UX). Sin el volteo horizontal (flip), mover la mano a la derecha provocaría un movimiento a la izquierda en pantalla, creando confusión al usuario.
 
 
 

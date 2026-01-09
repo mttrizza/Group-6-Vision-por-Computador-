@@ -217,68 +217,61 @@ pickle.dump({'model': model}, f)
 f.close()
 ```
 
+## collect_data.py
+#### Motivazione e necessità dello script
+Durante le fasi preliminari del progetto, è stato tentato l'addestramento utilizzando esclusivamente la fusione di due dataset pubblici preesistenti. Tuttavia, i test iniziali hanno evidenziato due criticità fondamentali:
+1)Eterogeneità dei dati: I dataset originali presentavano condizioni di illuminazione, sfondi e angolazioni troppo diverse rispetto all'ambiente operativo reale, portando a una scarsa capacità di generalizzazione del modello (Domain Shift).
+
+2)Incompletezza delle classi: Non è stato possibile reperire un dataset esterno che coprisse perfettamente tutte le classi desiderate
+
+Per risolvere queste problematiche senza dover annotare manualmente migliaia di immagini, è stato sviluppato lo script collect_data.py. Questo tool permette di integrare il dataset esistente con immagini acquisite direttamente dall'ambiente di utilizzo finale, migliorando drasticamente la robustezza del modello.
+
+#### Funzionamento Tecnico
+Lo script implementa un sistema di acquisizione on-demand. A differenza di una registrazione video continua, questo approccio permette all'utente di posizionare la mano correttamente e salvare il frame solo quando il gesto è perfetto, garantendo  qualità del dato in ingresso.
+Il funzionamento si basa su tre blocchi logici:
+
+1. Setup della Camera (Alta Risoluzione) Viene inizializzata la webcam con una risoluzione HD (1280x720). Utilizzare una risoluzione più alta in questa fase è cruciale per garantire che MediaPipe (nello step successivo) riceva dettagli sufficienti per estrarre i landmark con precisione.
+```python
+cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+```
+2. Gestione Dinamica delle Classi (File System) Il codice non richiede di pre-creare le cartelle manualmente. Sfruttando la libreria os, lo script verifica l'input da tastiera e gestisce automaticamente la struttura delle directory. Se l'utente preme il tasto "A", lo script controlla l'esistenza della cartella ./data/raw/A, la crea se necessario, e calcola il nome del file progressivo per evitare sovrascritture.
+```python
+# Convertiamo il codice tasto in lettera (es. 97 -> 'a' -> 'A')
+lettera = chr(key).upper()
+ 
+# Gestione automatica della struttura delle cartelle
+folder_path = os.path.join(DATA_DIR, lettera)
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
+```
+3. Acquisizione e Salvataggio (I/O) Al momento della pressione del tasto, il frame corrente viene "congelato" e salvato su disco tramite OpenCV. Questo permette di popolare rapidamente le classi meno rappresentate o di aggiungerne di nuove (come i comandi gestuali personalizzati) in pochi secondi.
+```python
+# Conta quanti file ci sono già per non sovrascrivere
+count = len(os.listdir(folder_path))
+          
+# Salva l'immagine
+file_name = f"aa{count}.jpg"
+cv2.imwrite(os.path.join(folder_path, file_name), frame)
+```
+
+## inference_classifier.py
+#### Infrastruttura e Sottosistemi di Supporto
+Questo script non è un semplice esecutore sequenziale, ma un sistema che integra diverse tecnologie asincrone.
+
+1. Gestione delle Dipendenze e Importazioni
+Il sistema si basa su uno stack tecnologico ibrido:
+
+Computer Vision: cv2 (OpenCV) per la gestione dei frame e mediapipe per l'estrazione scheletrica.
+
+Machine Learning: pickle e numpy per caricare il modello serializzato e gestire l'algebra lineare.
+
+Interfaccia Utente Avanzata: PIL (Pillow) viene introdotto per superare i limiti di OpenCV nel rendering di font TrueType (necessari per caratteri speciali come 'Ñ' o '¿') e numpy per la manipolazione pixel-by-pixel delle icone trasparenti.
+
+Concorrenza: threading è cruciale per evitare che la sintesi vocale (TTS) blocchi il flusso video (freeze), mantenendo il sistema in real-time.
 
 
-
-
-
-
-
-
-
-##collect_data.py
-Lo scopo principale di collect_data.py è:
-
-- acquisire immagini da una sorgente (ad esempio webcam)
-- salvare automaticamente le immagini nelle cartelle corrette del dataset
-- associare ogni immagine alla classe selezionata
-
-In questo modo è possibile costruire il dataset in modo più ordinato rispetto a una raccolta completamente manuale.
-
-Come funziona
-
-Lo script segue una logica semplice:
-
-- inizializza la sorgente video
-- permette di selezionare una classe (o una modalità)
-- acquisisce frame dall’ingresso video
-- salva i frame come immagini nelle cartelle del dataset
-
-Non è pensato per essere uno strumento robusto o definitivo, ma come un supporto pratico per il progetto.
-
-Librerie utilizzate
-
-Le principali librerie utilizzate sono:
-
-- cv2 (OpenCV) per l’acquisizione delle immagini
-- os per la gestione delle directory
-
-Non sono state utilizzate librerie avanzate di data acquisition o interfacce grafiche, per mantenere il codice semplice e leggibile.
-
-Struttura dei dati generati
-
-Le immagini salvate dallo script finiscono nella cartella:
-
-- data/raw/
-
-Ogni classe corrisponde a una sottocartella (lettere, simboli o comandi). Lo script assume che questa struttura esista già o venga creata automaticamente.
-
-Il nome dei file segue una numerazione progressiva, sufficiente per distinguere le immagini all’interno della stessa classe.
-
-Queste semplificazioni sono state accettate per concentrarci sugli aspetti principali del corso, piuttosto che sulla robustezza del software.
-
-Ruolo nel progetto
-
-collect_data.py rappresenta il primo passo della pipeline:
-
-raccolta delle immagini
-
-creazione del dataset (create_dataset.ipynb)
-
-training del classificatore
-
-Senza questo script, la costruzione del dataset sarebbe stata molto più lenta e disordinata.
----
 
 ## Tecnologie utilizzate
 

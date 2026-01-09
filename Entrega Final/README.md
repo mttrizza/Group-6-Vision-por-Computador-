@@ -76,9 +76,28 @@ Progetto_VC/
 
 ```
 
-### Descrizione delle cartelle e dei file principali
+## Descrizione delle cartelle e dei file principali
 
-## create_database.ipynb
+### utils.py 
+
+#### Scopo del modulo
+Il file utils.py contiene la logica matematica di trasformazione dei dati. La sua funzione principale, get_normalized_landmarks, agisce come un filtro intermedio tra l'estrazione grezza di MediaPipe e l'input del classificatore. L'obiettivo è rendere i dati agnostici rispetto alla posizione e alla distanza della mano, garantendo che il modello impari la forma del gesto e non la sua posizione nello spazio.
+
+#### Funzionamento Tecnico
+La funzione riceve in input l'oggetto hand_landmarks di MediaPipe e applica una pipeline di trasformazione in tre fasi:1. Conversione in Coordinate Relative (Invarianza alla Traslazione)I dati grezzi di MediaPipe sono coordinate assolute $(x, y)$ normalizzate rispetto alle dimensioni dell'immagine (0.0 - 1.0). Se usassimo questi dati direttamente, il modello imparerebbe che una mano nell'angolo in alto a sinistra è diversa da una mano nell'angolo in basso a destra, anche se fanno lo stesso gesto.Per risolvere questo problema, il codice imposta il polso (Landmark 0) come origine $(0, 0)$ del sistema cartesiano locale. Sottrae le coordinate del polso da tutti gli altri punti:
+```
+P'_{i} = P_{i} - P_{polso}
+```
+```Python
+# Trova le coordinate del polso (punto 0) per usarle come origine
+if index == 0:
+    base_x, base_y = landmark_point[0], landmark_point[1]
+
+# Sottrai la base a tutti i punti (Traslazione dell'origine)
+temp_landmark_list[index][0] = temp_landmark_list[index][0] - base_x
+temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y```
+```
+### create_database.ipynb
 #### Scopo del notebook
 Questo script costituisce la fase di Pre-processing e Feature Extraction della pipeline di Computer Vision. L'obiettivo non è semplicemente leggere le immagini, ma trasformare i dati non strutturati (pixel delle immagini raw) in dati strutturati (coordinate geometriche dei landmark della mano), pronti per l'addestramento di un classificatore (es. Random Forest).
 

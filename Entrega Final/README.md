@@ -3,8 +3,9 @@ Buongiorno prof siamo Mattia Rizza e Riccardo Belletti e questo è il nostro pro
 L’obiettivo del progetto è stato applicare in modo pratico i concetti visti a lezione volendo creare un vero e proprio traduttore per la lingua dei segni.
 Il progetto non nasce come un lavoro di ricerca avanzata, ma come un esercizio completo e realistico.
 Abbiamo preso un'idea che potrebbe sembrare banale inizialmente, ci abbiamo messo del nostro e siamo riusciti a tirare fuori un bel programma che si potrebbe realmente usare per aiutare le persone con questa disabilità.
-Una volta lanciato il programma si aprirà il video e l'utente vedrà che ci troviamo in modalità traduttore, in questa modalità l'utente potrà esercitarsi ad imparare la lingua dei segni spagnola  e gli altri simboli che abbiamo aggiunto per implementare delle azioni.
-Una volta che l'utente decide di voler scrivere un messaggio potrà fare il segno con le mani per entrare nella modalità scrittura, dentro questa modalità  l'utente potrà comporre  un qualsiasi messaggio lettera per lettera e, una volta concluso, potrà mettere il dito sul pulsante "parla" per far pronuciare al computer la frase composta.
+Lanciato il programma si aprirà il video e l'utente vedrà che ci troviamo in modalità traduttore, in questa modalità l'utente potrà esercitarsi ad imparare la lingua dei segni spagnola  e gli altri simboli che abbiamo aggiunto per implementare delle azioni.
+Una volta che l'utente decide di voler scrivere un messaggio potrà fare il segno con le mani per entrare nella modalità scrittura, dentro questa modalità  l'utente potrà comporre  un qualsiasi messaggio lettera per lettera e, una volta concluso, potrà mettere il dito sull'icona del microfono per far pronuciare al computer la frase composta.
+Per velocizzare la scrittura abbiamo aggiunto una funzionalità che ti permette di vedere a schermo delle parole consigliate mentre stai scrivendo, e quindi, se per esempio stai scrivendo "pro" verrano fuori alcune parole  come "proyecto" e mettendoci il dito sopra completerà la parola.
 Oltre ai segni per scrivere le lettere, noi abbiamo aggiunto al nostro dataset altri 6 segni per fare le seguenti azioni:
 1) entrare e uscire dalla modalità scrittura
 2) cancellare tutta la frase scritta in modalità scrittura
@@ -136,7 +137,7 @@ Lo scopo principale di collect_data.py è:
 
 In questo modo è possibile costruire il dataset in modo più ordinato rispetto a una raccolta completamente manuale.
 
-Come funziona a grandi linee
+Come funziona
 
 Lo script segue una logica semplice:
 

@@ -835,18 +835,32 @@ except Exception as e:
 ```
 Esto garantiza que un solo frame corrupto no termine la ejecución de la aplicación.
 
+## Stack Tecnológico Utilizado
+El proyecto ha sido desarrollado íntegramente en Python, aprovechando su extenso ecosistema de librerías para Inteligencia Artificial y procesamiento en tiempo real.
 
+### 1.⁠ ⁠Visión Artificial y Procesamiento de Imágenes
 
+**MediaPipe** *(Google)*: El núcleo del sistema. Utilizada para la detección y tracking de las manos (Hands Solution). Proporciona los 21 puntos de referencia (landmarks) en 3D.
 
+**OpenCV** *(cv2)*: Fundamental para la captura de video, el pre-procesamiento de frames y el renderizado de toda la interfaz gráfica (GUI) dinámica (dibujo de líneas, rectángulos y texto en pantalla).
 
+**Pillow** *(PIL)*: Utilizada para la gestión avanzada de imágenes, específicamente para cargar y superponer los iconos de la interfaz (micrófono, logos) manteniendo la transparencia (canal Alfa) que OpenCV no gestiona nativamente con facilidad.
 
-## Tecnologie utilizzate
+### 2.⁠ ⁠Machine Learning y Datos
 
-* **Python 3**
-* **Jupyter Notebook**
-* Librerie standard per la gestione di immagini e file (ad esempio `os`, `opencv`, `numpy`, quando necessario)
+**Scikit-learn**: Librería utilizada para entrenar el modelo de clasificación. Se usó el algoritmo Random Forest Classifier por su equilibrio entre precisión y velocidad de ejecución.
 
-Non abbiamo utilizzato framework particolarmente avanzati perché l’obiettivo del progetto era soprattutto capire **il flusso di lavoro**, non ottimizzare le prestazioni.
+**NumPy**: Esencial para las operaciones matemáticas de alto rendimiento. Se usa para convertir los landmarks en arrays, calcular distancias euclidianas y normalizar coordenadas.
+
+**Pickle**: Módulo utilizado para la serialización del modelo entrenado (model.p), permitiendo guardarlo y cargarlo instantáneamente sin re-entrenar cada vez.
+
+### 3.⁠ ⁠Interacción y Sistema
+
+**Pyttsx3**: Librería de síntesis de voz (Text-to-Speech) offline. Permite que el sistema "lea" en voz alta la frase construida por el usuario.
+
+**Threading**: Módulo de la librería estándar de Python. Crucial para ejecutar la síntesis de voz en un hilo separado, evitando que la interfaz de video se congele mientras el ordenador habla.
+
+**Math**: Usada para cálculos trigonométricos (necesarios para dibujar el arco de carga circular).
 
 ---
 
@@ -855,6 +869,8 @@ Non abbiamo utilizzato framework particolarmente avanzati perché l’obiettivo 
 - Se podría añadir la posibilidad de **modificar el idioma** en el que se quiere hablar y, en consecuencia, cambiar automáticamente el **diccionario** según el idioma seleccionado.
 - **Ampliar el diccionario** con muchas más palabras.
 
-
-
-
+## Conclusión
+Este proyecto nos ha resultado muy útil para aprender nuevas formas de aplicar las tecnologías vistas en clase en un contexto real y significativo. En particular, la idea de integrar un diccionario con palabras sugeridas para facilitar la escritura ha sido una manera concreta de reflexionar sobre los sistemas de asistencia che utilizamos desde hace años en nuestros dispositivos móviles, entendiendo mejor la lógica y el diseño que hay detrás de este tipo de interfaces.  
+El desarrollo del proyecto ha sido también una verdadera prueba para comprender hasta dónde podíamos llegar, especialmente teniendo en cuenta el tiempo disponible y la complejidad de integrar distintas áreas como visión artificial, aprendizaje automático, interfaz de usuario y accesibilidad.   
+Trabajar en equipo, con una persona que comparte la misma motivación y ganas de aprender, ha sido fundamental para afrontar las dificultades y avanzar de forma constante.  
+Hemos mostrado el vídeo de presentación del proyecto a amigos y familiares en Italia, y la reacción ha sido muy positiva, lo que nos ha confirmado el valor práctico y humano de la idea desarrollada. Esperamos que el proyecto resulte igualmente interesante y significativo para ustedes. Muchas gracias.

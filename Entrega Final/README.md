@@ -782,49 +782,58 @@ if predicted_character == 'N' and movement > UMBRAL_MOVIMIENTO_N:
 ```
 Si el sistema detecta la forma "N" PERO existe una oscilación significativa, "asciende" la predicción a "Ñ", convirtiendo un modelo estático en uno capaz de entender dinámicas temporales.
 
-#### Stabilizzazione Temporale (Anti-Flickering)
-Una volta determinata la lettera (es. "A"), non possiamo scriverla subito. I modelli ML "sfarfallano" (es. A-A-B-A-A) centinaia di volte al secondo. Per evitare di scrivere "AAAAA", è stato implementato un Timer di Conferma (CONFIRMATION_TIME = 1.5 secondi).
-Il sistema verifica la stabilità:
+#### Estabilización Temporal (Anti-Flickering)
+Una vez determinada la letra (ej. "A"), no podemos escribirla inmediatamente. Los modelos de Machine Learning tienden a "parpadear" o fluctuar (ej. A-A-B-A-A) cientos de veces por segundo. Para evitar escribir "AAAAA" involuntariamente, se ha implementado un Temporizador de Confirmación (CONFIRMATION_TIME = 1.5 segundos). El sistema verifica la estabilidad de la predicción:
 ```python
 is_stable = (predicted_character == last_char_detected)
 ```
-•	Se la lettera cambia, il timer si resetta.
-•	Se la lettera rimane la stessa, il timer avanza.
-Durante l'attesa, l'utente riceve un feedback visivo immediato: un cerchio di caricamento disegnato attorno alla mano (cv2.ellipse), che si riempie progressivamente. Questo comunica all'utente: "Ho capito che vuoi fare la A, tienila ferma ancora un attimo...".
+- Si la letra cambia: El temporizador se reinicia.
+- Si la letra permanece igual: El temporizador avanza.
+Durante la espera, el usuario recibe un feedback visual inmediato: un círculo de carga dibujado alrededor de la mano (cv2.ellipse), que se rellena progresivamente. Esto comunica al usuario: "He entendido que quieres hacer la A, mantenla quieta un momento más...".
 
-#### La Macchina a Stati (Esecuzione Comandi)
-Quando il timer scade (elapsed >= CONFIRMATION_TIME), il sistema esegue l'azione associata al gesto riconosciuto. Qui il codice agisce come una macchina a stati finiti.
-•	Stato 1: Cambio Modalità (SWITCH) Se il gesto è "MODO_ESCRITURA" (Rock), inverte lo stato booleano is_writing_mode.
+Para lograr este efecto, el código calcula el ángulo del arco basándose en el tiempo transcurrido y lo dibuja sobre el frame en tiempo real:
+```python
+# Cálculo del porcentaje de completado (0.0 a 1.0)
+progress = (time.time() - start_time) / CONFIRMATION_TIME
+# Convertir a grados (0 a 360) para el arco
+angle = int(progress * 360)
+# Dibujar el arco progresivo alrededor de la muñeca
+# -90 indica que el dibujo comienza desde la parte superior (las 12 en punto)
+cv2.ellipse(frame, (wrist_x, wrist_y), (60, 60), -90, 0, angle, (0, 255, 0), 2)
+```
+
+#### La Máquina de Estados (Ejecución de Comandos)
+Cuando el temporizador expira (elapsed >= CONFIRMATION_TIME), el sistema ejecuta la acción asociada al gesto reconocido. Aquí el código actúa como una máquina de estados finitos.
+Estado 1: Cambio de Modalidad (SWITCH) Si el gesto es "MODO_ESCRITURA" (Rock), invierte el estado booleano is_writing_mode.
 ```python
 is_writing_mode = not is_writing_mode
 ```
-•  Stato 2: Editing del Testo Se siamo in modalità scrittura, il gesto viene tradotto in manipolazione della stringa sentence:
-•	Caratteri standard: Vengono appesi alla stringa.
-•	BACKSPACE: Rimuove l'ultimo carattere (sentence[:-1]).
-•	BORRAR_TODO: Rimuove tutto ciò che è stato scritto.
-•	SPACE: Aggiunge uno spazio.
-Gestione Trigger Unico: La variabile action_just_triggered impedisce che l'azione venga ripetuta all'infinito se l'utente non muove la mano. L'azione avviene una volta sola, poi il sistema attende che il gesto cambi o che la mano si sposti ("Key Up event").
-Questa sezione finale analizza come il codice garantisce fluidità e stabilità operativa.
+Estado 2: Edición de Texto Si estamos en modo escritura, el gesto se traduce en la manipulación de la cadena sentence:
+- Caracteres estándar: Se concatenan a la cadena.
+- BACKSPACE: Elimina el último carácter (sentence[:-1]).
+- BORRAR_TODO: Elimina todo lo que se ha escrito.
+- SPACE: Añade un espacio en blanco.
 
-#### Robustezza e Gestione degli Errori (Fault Tolerance)
-Un software non deve mai, ed è stato blindato contro i fallimenti critici attraverso l'uso strategico dei blocchi try...except.
-•	Caricamento Risorse Esterne: All'avvio, lo script tenta di caricare le icone PNG (mic_blue.png, ecc.). Se i file mancano (errore comune quando si sposta il progetto su un altro PC), il codice intercetta l'eccezione e attiva la funzione di fallback create_dummy_icon, generando risorse grafiche procedurali al volo.
+Gestión de Disparador Único: La variable action_just_triggered impide que la acción se repita infinitamente si el usuario no mueve la mano. La acción ocurre una sola vez, y luego el sistema espera a que el gesto cambie o la mano se mueva (evento "Key Up").
+
+#### Robustez y Gestión de Errores (Fault Tolerance)
+Un software nunca debe fallar inesperadamente; por ello, ha sido blindado contra fallos críticos mediante el uso estratégico de bloques try...except.
+•	Carga de Recursos Externos: Al inicio, el script intenta cargar los iconos PNG (mic_blue.png, etc.). Si los archivos faltan (error común al mover el proyecto a otro PC), el código intercepta la excepción y activa la función de respaldo create_dummy_icon, generando recursos gráficos procedimentales sobre la marcha.
 ```python
 except Exception as e:
-    print(f"⚠️ Errore caricamento icone: {e}. Uso fallback.")
+    print(f"⚠️ Error cargando iconos: {e}. Usando fallback.")
     icon_blue = create_dummy_icon(...)
 ```
-•	Pipeline di Riconoscimento: Anche durante il ciclo principale, l'elaborazione di MediaPipe o la predizione del modello potrebbero generare errori imprevisti (es. valori NaN, divisioni per zero in casi limite). L'intero blocco logico è protetto:
+•	Pipeline de Reconocimiento: Incluso durante el ciclo principal, el procesamiento de MediaPipe o la predicción del modelo podrían generar errores imprevistos (ej. valores NaN o divisiones por cero en casos límite). Todo el bloque lógico está protegido:
 ```python
 try:
     features = get_normalized_landmarks(hand_landmarks)
-    # ... logica di predizione ...
+    # ... lógica de predicción ...
 except Exception as e:
     display_text = "Err"
-    # Il programma continua a girare invece di chiudersi
+    # El programa continúa ejecutándose en lugar de cerrarse
 ```
-Questo garantisce che un singolo frame corrotto non termini l'applicazione.
-
+Esto garantiza que un solo frame corrupto no termine la ejecución de la aplicación.
 
 
 

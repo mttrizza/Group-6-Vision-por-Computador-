@@ -222,8 +222,7 @@ Se introdujeron gestos especiales para:
 - Insertar **espacios**
 - Borrar **todo**
 - Borrar el **último carácter**
-- Insertar el **signo de interrogación**  
-Esto transforma el reconocedor en un **verdadero sistema de escritura gestual**.
+- Insertar el **signo de interrogación**: esto transforma el reconocedor en un **verdadero sistema de escritura gestual**.
 
 # 9. Text-to-Speech (Accesibilidad)
 

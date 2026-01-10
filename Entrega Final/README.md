@@ -795,7 +795,7 @@ if max_prob < MIN_CONFIDENCE:
 
 Esto **evita** que el sistema escriba caracteres aleatorios cuando la mano está en transición o en una posición ambigua, lo que reduce drásticamente el «ruido» de fondo.
 
-#### Corrección de Errores y Post-Procesamiento
+### Corrección de Errores y Post-Procesamiento
 
 Los modelos basados únicamente en imágenes **2D** suelen confundir gestos similares. Para resolver este problema, se han inyectado en el código correctores lógicos basados en la geometría **3D** y en el análisis temporal.
 
@@ -829,7 +829,7 @@ if predicted_character == 'N' and movement > UMBRAL_MOVIMIENTO_N:
 
 Si el sistema detecta la forma "**N**" PERO existe una oscilación significativa, "asciende" la predicción a "**Ñ**", convirtiendo un modelo estático en uno capaz de entender dinámicas temporales.
 
-#### Estabilización Temporal (Anti-Flickering)
+### Estabilización Temporal (Anti-Flickering)
 Una vez determinada la letra (ej. "A"), no podemos escribirla inmediatamente. Los modelos de **Machine Learning** tienden a "parpadear" o fluctuar (ej. A-A-B-A-A) cientos de veces por segundo.  
 Para evitar escribir "AAAAA" involuntariamente, se ha implementado un **Temporizador de Confirmación** (*CONFIRMATION_TIME = 1.5 segundos*). El sistema verifica la estabilidad de la predicción:
 
@@ -855,7 +855,7 @@ angle = int(progress * 360)
 cv2.ellipse(frame, (wrist_x, wrist_y), (60, 60), -90, 0, angle, (0, 255, 0), 2)
 ```
 
-#### La Máquina de Estados (Ejecución de Comandos)
+### La Máquina de Estados (Ejecución de Comandos)
 
 Cuando el temporizador expira (*elapsed >= CONFIRMATION_TIME*), el sistema ejecuta la acción asociada al gesto reconocido. Aquí el código actúa como una máquina de **estados finitos**.
 
@@ -875,7 +875,7 @@ Si estamos en modo escritura, el gesto se traduce en la manipulación de la cade
 
 Gestión de **Disparador Único**: La variable *action_just_triggered* impide que la acción se repita infinitamente si el usuario no mueve la mano. La acción ocurre una sola vez, y luego el sistema espera a que el gesto cambie o la mano se mueva (evento "Key Up").
 
-#### Robustez y Gestión de Errores (Fault Tolerance)
+### Robustez y Gestión de Errores (Fault Tolerance)
 Un **software** nunca debe fallar inesperadamente; por ello, ha sido blindado contra fallos críticos mediante el uso estratégico de bloques try...except.
 
 1. **Carga de Recursos Externos**:

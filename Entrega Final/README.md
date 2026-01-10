@@ -409,6 +409,10 @@ Al inicio de cada iteración, el sistema adquiere el frame bruto de la cámara. 
 
 
 
+## Diario
+En lo que respecta al **diario** de este *proyecto final*, muy a menudo hemos trabajado de manera presencial, ya fuera después de las clases en la *biblioteca de la universidad* o en otra *biblioteca* cercana a **Las Canteras**.  
+Hemos realizado casi todo el proyecto *juntos* y de *forma presencial*, para que ambos pudiéramos entender bien lo que hacía el otro y porque ante cualquier **problema** o **duda**, en *persona* se consigue resolver casi de inmediato, en lugar de hacerlo por *teléfono*.    
+Las pocas veces en las que no conseguíamos encontrarnos en persona, utilizábamos **videollamadas por WhatsApp** o, cuando uno podía y el otro no, trabajábamos de **forma individual** enviándonos mensajes cada vez que se realizaba alguna modificación o avance.
 
 
 ## Tecnologie utilizzate
@@ -422,21 +426,12 @@ Non abbiamo utilizzato framework particolarmente avanzati perché l’obiettivo 
 ---
 
 ## Metodologia di lavoro
+[DA FARE]
 
-Il progetto è stato sviluppato in modo iterativo:
-
-1. raccolta manuale delle immagini
-2. organizzazione iniziale in cartelle
-3. scrittura di script per automatizzare operazioni ripetitive
-4. verifica del dataset tramite notebook
-
-Durante il lavoro ci siamo resi conto che:
-
-* la qualità dei dati è fondamentale
-* anche piccoli errori di organizzazione rendono difficile l’uso del dataset
-* molte decisioni pratiche non erano ovvie senza esperienza
-
-Per questo alcune scelte non sono “perfette”, ma riflettono il nostro livello e il contesto didattico del corso.
+## Propuestas de ampliación
+- Se podría añadir la posibilidad de **traducir gestos dinámicos** y no solo estáticos, incorporando también la **segunda mano** para la detección.
+- Se podría añadir la posibilidad de **modificar el idioma** en el que se quiere hablar y, en consecuencia, cambiar automáticamente el **diccionario** según el idioma seleccionado.
+- **Ampliar el diccionario** con muchas más palabras.
 
 
 

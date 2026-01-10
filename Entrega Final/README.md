@@ -84,24 +84,20 @@ El pre-procesamiento fue diseñado para garantizar:
 
 - **Invariancia a la traslación**
 El gesto debe ser reconocido independientemente de la posición de la mano en la imagen.
-
 - **Invariancia de escala**
 El gesto debe ser reconocido tanto con la mano cerca como lejos de la cámara.
-
 - **Compatibilidad con modelos de Machine Learning**
 Los datos deben transformarse en un vector numérico adecuado para un clasificador.
 
 3.2 **Pipeline de Procesamiento**
 
-La función pre_process_landmark aplica los siguientes pasos:
+La función **pre_process_landmark** aplica los siguientes pasos:
 
 1. **Copia de seguridad**
 Se crea una deepcopy de los landmarks para evitar modificar los datos utilizados para el renderizado gráfico.
 
 2. **Relativización de las coordenadas**
-
-El *landmark* 0 (muñeca) se fija como origen (0,0).
-Todos los demás *puntos* se expresan como diferencia respecto a la muñeca.
+El *landmark* 0 (muñeca) se fija como origen (0,0). Todos los demás *puntos* se expresan como diferencia respecto a la muñeca.
 
 3. **Flattening**
 La lista de pares (x, y) se transforma en un único vector unidimensional.

@@ -289,7 +289,7 @@ Progetto_VC/
 │
 └── .DS_Store
 ```
-
+La carpeta /data/raw es una carpeta temporal en la que guardábamos las imágenes creadas por collect_data.py. El conjunto de datos real que hemos utilizado se encuentra en el enlace de One Drive que aparece al principio de este archivo readme.
 
 ## Descripción de las carpetas y de los archivos principales
 

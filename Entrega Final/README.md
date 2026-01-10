@@ -1,4 +1,6 @@
-# Buenos días profesor, somos Mattia Rizza y Riccardo Belletti y este es nuestro proyecto final de Visión por Computador
+# TraductorRBMR
+
+Buenos días profesor, somos Mattia Rizza y Riccardo Belletti Grupo 6 y este es nuestro proyecto final de Visión por Computador  
 <img src="img/TraductorRBMR.png" width="500" />
 
 [Link Projecto y Video y Dataset](https://alumnosulpgc-my.sharepoint.com/:f:/g/personal/mattia_rizza101_alu_ulpgc_es/IgC-0DDnFtsgSYzWowwpVGCvAVrgFpJ8NdjnmPI-oWncQes?e=cIqijs)

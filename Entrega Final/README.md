@@ -443,12 +443,22 @@ def get_suggestions_list(current_sentence):
 
 Este diseño permite obtener sugerencias instantáneas (complejidad computacional mínima) que se actualizan frame a frame mientras el usuario compone el gesto.
 
+**Arquitectura del Ciclo de Ejecución (Runtime Loop)**
+Una vez inicializados los subsistemas de soporte (Gráficos, Audio, NLP), el control del programa pasa al núcleo operativo.
+
+El script está encapsulado en un bucle infinito (while True), que actúa como orquestador central gestionando la sincronización estricta entre la adquisición del mundo real (Webcam) y el renderizado de la información digital (GUI).
+
 **Adquisición y normalización del flujo de vídeo** 
+Al inicio de cada iteración, el sistema adquiere el frame bruto de la cámara.
+```python
+while True:
+    ret, frame = cap.read()
+    if not ret: break
+```
+Sin embargo, antes de pasar a la fase de inferencia o dibujo, se ejecutan dos operaciones críticas de pre-processing para adecuar los datos:
 
-Al inicio de cada iteración, el sistema adquiere el frame bruto de la cámara. Sin embargo, antes de cualquier procesamiento, se ejecutan dos operaciones críticas de pre-processing:
-
-- **Conversión de espacio de color**: *MediaPipe*, al estar entrenado sobre datasets RGB, requiere este formato, mientras que OpenCV adquiere nativamente en BGR.
-- **Mirroring (Efecto espejo)**: esta operación es fundamental para la Usabilidad (UX). Sin el volteo horizontal (flip), mover la mano a la derecha provocaría un movimiento a la izquierda en pantalla, creando confusión al usuario.
+- Conversión de espacio de color: MediaPipe, al estar entrenado sobre datasets RGB, requiere este formato específico, mientras   que OpenCV adquiere nativamente en BGR. La conversión es necesaria para garantizar la precisión del modelo.
+- Mirroring (Efecto espejo): Esta operación es fundamental para la Usabilidad (UX). Sin el volteo horizontal (flip), mover la   mano física hacia la derecha provocaría un movimiento hacia la izquierda en la pantalla (como una cámara de vigilancia),     creando una disonancia cognitiva que haría imposible interactuar con los botones.
 
 #### Rendering dell'Interfaccia Dinamica (GUI)
 L'interfaccia utente non è statica, ma contestuale: cambia in base allo stato del sistema. Il codice utilizza una logica condizionale per decidere cosa disegnare.

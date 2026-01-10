@@ -626,61 +626,66 @@ Sin embargo, antes de pasar a la fase de inferencia o dibujo, se ejecutan dos op
 - Conversión de espacio de color: MediaPipe, al estar entrenado sobre datasets RGB, requiere este formato específico, mientras   que OpenCV adquiere nativamente en BGR. La conversión es necesaria para garantizar la precisión del modelo.
 - Mirroring (Efecto espejo): Esta operación es fundamental para la Usabilidad (UX). Sin el volteo horizontal (flip), mover la   mano física hacia la derecha provocaría un movimiento hacia la izquierda en la pantalla (como una cámara de vigilancia),     creando una disonancia cognitiva que haría imposible interactuar con los botones.
 
-#### Rendering dell'Interfaccia Dinamica (GUI)
-L'interfaccia utente non è statica, ma contestuale: cambia in base allo stato del sistema. Il codice utilizza una logica condizionale per decidere cosa disegnare.
-Modalità Scrittura vs. Attesa: Il booleano is_writing_mode funge da gatekeeper grafico:
-- Se False (Attesa): L'interfaccia è minimalista (barra grigia), invitando l'utente a fare il gesto di attivazione ("ROCK").
-- Se True (Scrittura): Viene renderizzata la "Dashboard" completa:
-  - La Barra Verde in alto, che ospita la frase in costruzione .
-  - Il Pulsante Microfono, che non è un'immagine fissa ma un oggetto a stati (Blu = Riposo, Giallo = Hover, Verde = Attivo).
-  - I Box dei Suggerimenti, generati dinamicamente iterando sulla lista current_suggestions.
+**Renderizado de la Interfaz Dinámica (GUI)**
+La interfaz de usuario no es estática, sino contextual: cambia según el estado del sistema. El código utiliza una lógica condicional para decidir qué elementos dibujar en pantalla.
 
-#### Logica dei Pulsanti Virtuali (Touchless Interaction)Uno degli aspetti più innovativi del progetto è l'implementazione di pulsanti cliccabili senza contatto fisico. Poiché non esiste un mouse o un touch screen, il sistema deve simulare il "click" usando solo la posizione della mano.Questo viene realizzato attraverso un algoritmo in tre fasi: Mapping, Collision Detection e Temporal Filtering.A. Mapping delle CoordinateMediaPipe restituisce coordinate normalizzate ($0.0 \rightarrow 1.0$). Per interagire con la GUI, queste devono essere proiettate nello spazio pixel dello schermo ($1280 \times 720$):
+Modo Escritura vs. Modo Traductor El booleano is_writing_mode actúa como un guardian gráfico:
+- Si es False (Traductor): La interfaz es minimalista (una barra gris), invitando al usuario a realizar el gesto de activación   ("ROCK").
+
+- Si es True (Escritura): Se renderiza el "Dashboard" completo:
+  - La Barra Verde superior, que contiene la frase en construcción.
+  - El Botón de Micrófono, un objeto con estados (Azul = Reposo, Amarillo = Hover, Verde = Activo).
+  - Las Cajas de Sugerencias, generadas dinámicamente iterando sobre la lista current_suggestions.
+
+Lógica de los Botones Virtuales (Interacción Sin Contacto) Uno de los aspectos más innovadores es la implementación de botones clicables sin contacto físico. Dado que no existe un ratón o pantalla táctil, el sistema debe simular el "clic" usando solo la posición de la mano mediante un algoritmo en tres fases: Mapping, Collision Detection y Temporal Filtering.
+
+1)Mapeo de Coordenadas (Mapping): MediaPipe devuelve coordenadas normalizadas (0.0→1.0). Para interactuar con la GUI, estas deben proyectarse en el espacio de píxeles de la pantalla (1280×720):
 ```python
 index_x = int((1 - hand_landmarks.landmark[8].x) * W)
 index_y = int(hand_landmarks.landmark[8].y * H)
 ```
 
-B. Collision Detection (Rilevamento Collisioni)
-Il sistema verifica se il punto $(x, y)$ dell'indice cade all'interno del rettangolo di un pulsante (Bounding Box). Esempio per il tasto "PARLA":
+2) Collision Detection (Rilevamento Collisioni)
+Detección de Colisiones (Collision Detection):
+El sistema verifica si el punto $(x,y)$ del dedo índice cae dentro del rectángulo de un botón (Bounding Box).
 ```python
-if BTN_PARLA_X < index_x < (BTN_PARLA_X + BTN_PARLA_W) and \
+if BTN_PARLA_X < index_x < (BTN_PARLA_X + BTN_PARLA_W) and 
    BTN_PARLA_Y < index_y < (BTN_PARLA_Y + BTN_PARLA_H):
        is_hovering_any_ui = True
 ```
-C. Temporal Filtering (Dwell Time) Il problema principale delle interfacce gestuali è l'effetto "Midas Touch": si rischia di cliccare tutto ciò che si tocca per sbaglio. Per evitare falsi positivi, è stato implementato un meccanismo di Dwell Time (tempo di permanenza). L'utente deve mantenere il dito sul pulsante per un tempo prefissato (es. 1.0 secondo) per confermare l'intenzione.
+C. Filtrado Temporal (Dwell Time): El problema principal de las interfaces gestuales es el efecto "Midas Touch": el riesgo de clicar todo lo que se toca accidentalmente. Para evitar falsos positivos, se implementó un mecanismo de Dwell Time (tiempo de permanencia). El usuario debe mantener el dedo sobre el botón por un tiempo prefijado (ej. 1.0 segundo) para confirmar la intención.
+
+Se proporciona un Feedback Visual Progresivo: una barra de carga amarilla se dibuja proporcionalmente al tiempo transcurrido:
 ```python
 elapsed = time.time() - hover_start_time
-```
-E fornisce un Feedback Visivo Progressivo (Barra di caricamento o cambio colore):
-```python
-# Disegna barra di caricamento gialla proporzionale al tempo trascorso
 load_w = int((elapsed / 1.0) * BTN_W)
 cv2.rectangle(frame, ..., (BTN_X + load_w, ...), (0, 255, 255), -1)
 ```
-Solo quando elapsed >= 1.0, l'evento viene scatenato (action_triggered_flag = True) e il comando viene eseguito (es. avvio del thread vocale).4. Gestione Dinamica dei SuggerimentiI pulsanti dei suggerimenti non sono fissi. Ad ogni frame, se l'utente sta scrivendo, il sistema ricalcola le coordinate per $N$ pulsanti (dove $N$ è la lunghezza di current_suggestions).
+Solo cuando elapsed >= 1.0, se dispara el evento (ej. inicio del hilo de voz).
+
+4. Gestión Dinámica de Sugerencias
+Los botones de sugerencias se adaptan: si no hay sugerencias, desaparecen; si hay 3, aparecen alineados calculando sus coordenadas en tiempo real:
 ```python
 for i, word in enumerate(current_suggestions):
     bx = SUGG_START_X + (SUGG_W + SUGG_GAP) * i
-    # ... disegno rettangolo e testo ...
-    # ... controllo collisione per ogni i-esimo pulsante ...
+    # Renderizado del rectángulo y texto...
 ```
-Questo design permette all'interfaccia di adattarsi: se non ci sono suggerimenti, i pulsanti spariscono; se ce ne sono 3, appaiono ordinatamente affiancati.
-Una volta che il sistema ha rilevato che l'utente non sta interagendo con i pulsanti (quindi is_hovering_any_ui == False), entra in gioco la pipeline di riconoscimento gestuale.
 
-Questa fase non si limita a chiedere "che lettera è?", ma applica una serie di filtri logici e temporali per correggere gli errori tipici della visione artificiale.
-Il primo passo è l'interrogazione del modello Random Forest. Invece di chiedere semplicemente la classe vincente (model.predict), il codice richiede le probabilità (model.predict_proba).
+Una vez que el sistema detecta que el usuario no está interactuando con los botones (es decir, is_hovering_any_ui == False), entra en juego el proceso de reconocimiento de gestos.
+
+Esta fase no se limita a preguntar «¿qué letra es?», sino que aplica una serie de filtros lógicos y temporales para corregir los errores típicos de la visión artificial.
+El primer paso es consultar el modelo Random Forest. En lugar de preguntar simplemente por la clase ganadora (model.predict), el código solicita las probabilidades (model.predict_proba).
 ```python
 features = get_normalized_landmarks(hand_landmarks)
 prediction_proba = model.predict_proba([np.asarray(features)])
 max_prob = np.max(prediction_proba)
 ```
-Questo permette di implementare un Filtro di Confidenza:
+Esto permite implementar un filtro de confianza:
 ```python
 if max_prob < MIN_CONFIDENCE:
-    # Ignora il gesto se il modello non è abbastanza sicuro
+    # Ignora el gesto si el modelo no es lo suficientemente seguro.
 ```
-Questo impedisce al sistema di scrivere caratteri casuali quando la mano è in transizione o in una posizione ambigua, riducendo drasticamente il "rumore" di fondo.
+Esto evita que el sistema escriba caracteres aleatorios cuando la mano está en transición o en una posición ambigua, lo que reduce drásticamente el «ruido» de fondo.
 
 #### Correzione problemi
 I modelli basati solo su immagini 2D spesso confondono gesti simili. Per risolvere questo problema, nel codice sono stati iniettati dei correttori logici basati sulla geometria 3D e sul tempo.

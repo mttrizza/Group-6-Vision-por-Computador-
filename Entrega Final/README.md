@@ -730,21 +730,7 @@ is_writing_mode = not is_writing_mode
 •	SPACE: Aggiunge uno spazio.
 Gestione Trigger Unico: La variabile action_just_triggered impedisce che l'azione venga ripetuta all'infinito se l'utente non muove la mano. L'azione avviene una volta sola, poi il sistema attende che il gesto cambi o che la mano si sposti ("Key Up event").
 Questa sezione finale analizza come il codice garantisce fluidità e stabilità operativa.
-#### Gestione della Concorrenza (Il Problema del TTS)
 
-
-NE ABBIAMO Già PARLATO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  MA FORSE NE PARLIAMO  MEGLIO ORA
-L'operazione più "costosa" in termini di tempo non è il riconoscimento dell'immagine, ma la sintesi vocale. La funzione engine.runAndWait() della libreria pyttsx3 è intrinsecamente bloccante: se il computer deve dire "Buongiorno, come stai?", impiega circa 2-3 secondi. In un'architettura a thread singolo (Single-Threaded), questo significherebbe congelare la webcam per 3 secondi.
-Per risolvere questo collo di bottiglia, è stato implementato il Multithreading.
-Analizziamo la funzione run_voice_thread:
-```python
-def run_voice_thread(text):
-    t = threading.Thread(target=speak_function, args=(text, VOICE_ID_MANUALE))
-    t.start()
-```
--  Disaccoppiamento: Quando l'utente preme il pulsante "PARLA", il sistema non esegue l'audio direttamente. Invece, istanzia un oggetto Thread.
- - Esecuzione Parallela: Il metodo .start() ordina al sistema operativo di creare un nuovo flusso di esecuzione (worker thread).
--  Risultato: Il ciclo while True principale (Main Thread) continua immediatamente a processare il frame successivo della webcam senza attendere. L'audio viene riprodotto in parallelo. Questo design pattern è fondamentale nei sistemi Real-Time Interactive, separando il Rendering Loop (video) dal Processing Loop (audio).
 #### Robustezza e Gestione degli Errori (Fault Tolerance)
 Un software non deve mai, ed è stato blindato contro i fallimenti critici attraverso l'uso strategico dei blocchi try...except.
 •	Caricamento Risorse Esterne: All'avvio, lo script tenta di caricare le icone PNG (mic_blue.png, ecc.). Se i file mancano (errore comune quando si sposta il progetto su un altro PC), il codice intercetta l'eccezione e attiva la funzione di fallback create_dummy_icon, generando risorse grafiche procedurali al volo.

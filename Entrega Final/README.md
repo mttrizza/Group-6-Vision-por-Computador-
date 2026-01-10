@@ -114,7 +114,7 @@ temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y
 **2. Flattening (aplanamiento)**  
 Los datos se convierten de una lista de parejas bidimensionales [[x1, y1], [x2, y2]...] a un único vector unidimensional [x1, y1, x2, y2...].
 
-Appiattisci la lista usando itertools
+Aplana la lista utilizando itertools.
 ```python
 temp_landmark_list = list(itertools.chain.from_iterable(temp_landmark_list))
 ```

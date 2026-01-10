@@ -281,15 +281,14 @@ Progetto_VC/
 │
 ├── pycache/
 │
-├── inference_classifier.py
-│
-├── model.p
-│
-├── test_vision.py
 ├── utils.py
 │
 ├── create_dataset.ipynb
 ├── train_classifier.ipynb
+│
+├── model.p
+│
+├── traductorRBMR.py
 │
 ├── data/
 │ ├── collect_data.py
@@ -537,7 +536,7 @@ file_name = f"aa{count}.jpg"
 cv2.imwrite(os.path.join(folder_path, file_name), frame)
 ```
 
-### inference_classifier.py
+### traductorRBMR.py
 
 **La infraestructura software y los motores de soporte**
 
@@ -929,6 +928,36 @@ El proyecto ha sido desarrollado íntegramente en Python, aprovechando su extens
 **Threading**: Módulo de la librería estándar de Python. Crucial para ejecutar la síntesis de voz en un hilo separado, evitando que la interfaz de video se congele mientras el ordenador habla.
 
 **Math**: Usada para cálculos trigonométricos (necesarios para dibujar el arco de carga circular).
+
+---
+## Fuentes
+### 1. Literatura Científica y Algorítmica 
+Para el desarrollo del sistema de seguimiento de manos, nos hemos basado en la investigación original de Google:
+Lugares, F. et al. (2020). MediaPipe Hands: On-device Real-time Hand Tracking. Este documento sirvió como base teórica para comprender la topología de los 21 puntos de referencia (landmarks) y cómo se extrae la coordenada Z (profundidad relativa).
+
+### 2. Documentación Técnica Oficial 
+La implementación del código se ha guiado por la documentación oficial de las librerías utilizadas, garantizando el uso de buenas prácticas:
+
+**Scikit-learn Documentation**: Específicamente la sección sobre Ensemble Methods y Random Forest Classifier para la optimización de hiperparámetros.
+
+**OpenCV Documentation**: Para las funciones de procesamiento de imágenes y dibujo de primitivas gráficas.
+
+**Python Software Foundation**: Para la gestión de hilos (threading) y manejo de excepciones.
+
+### 3. Origen de los Datos (Enfoque Híbrido)
+Para el entrenamiento del modelo, se ha optado por una estrategia mixta que combina el volumen de datos públicos con la especificidad de muestras generadas ad-hoc:
+
+**Datasets Públicos (Base de Conocimiento)**: Se han seleccionado e integrado dos conjuntos de datos obtenidos de la plataforma Kaggle, "Spanish Sign Language Alphabet Static" y "Lenguaje de Signos Español",Estos proporcionaron una base sólida inicial con gran variabilidad de usuarios y formas de manos.
+
+**Generación de Datos Propios (Data Augmentation)**: Para adaptar el modelo a las condiciones operativas reales, se amplió el dataset base utilizando nuestra herramienta personalizada collect_data.py.
+
+### 4. Herramientas de Asistencia e Inteligencia Artificial Generativa 
+Como soporte a la productividad y la internacionalización del proyecto, se han utilizado modelos de lenguaje extensos (LLMs) bajo supervisión humana:
+
+**Gemini (Google) y ChatGPT (OpenAI)**: Se han empleado como herramientas auxiliares para:
+- Traducción y localización: Adaptación precisa de los textos técnicos y comentarios del código del italiano al español.
+- Enriquecimiento del Diccionario: Generación de listas de palabras de alta frecuencia para expandir el vocabulario del   sistema de autocompletado.
+- Debugging asistido: Análisis preliminar de trazas de error (stack traces) para agilizar la identificación de fallos sintácticos menores.
 
 ---
 

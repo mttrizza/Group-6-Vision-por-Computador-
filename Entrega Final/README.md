@@ -30,16 +30,6 @@ A continuación es posible ver la leyenda con todos los gestos utilizables.
 
 --- 
 
-## Idea general del proyecto
-
-La idea base ha sido mezclar algunos datasets de imágenes organizados en clases encontrados en **Kaggle** y luego integrarlos con imágenes hechas por *nosotros*, en aquellas letras que nuestro programa tenía *dificultades* para reconocer correctamente.
-
-En particular:
-
-- hemos recopilado imágenes en bruto (raw data) que ya estaban organizadas en carpetas
-- hemos escrito scripts de Python para automatizar parte del proceso
-- hemos usado un notebook de Jupyter para explorar y verificar el dataset
-
 ## Diario y Metodología de trabajo
 En lo que respecta al **diario** de este *proyecto final*, muy a menudo hemos trabajado de manera presencial, ya fuera después de las clases en la *biblioteca de la universidad* o en otra *biblioteca* cercana a **Las Canteras** y para finalizar los últimos detalles, nos reunimos en casa de Riccardo.  
 Por la metodologís de trabajo hemos realizado casi todo el proyecto *juntos* y de *forma presencial*, para que ambos pudiéramos entender bien lo que hacía el otro y porque ante cualquier **problema** o **duda**, en *persona* se consigue resolver casi de inmediato, en lugar de hacerlo por *teléfono*.    
@@ -322,14 +312,17 @@ Progetto_VC/
 ### utils.py
 
 **Objetivo del módulo**
-El archivo **utils.py** contiene la *lógica matemática de transformación de los datos*. Su función principal, *get_normalized_landmarks*, actúa como un filtro intermedio entre la extracción en bruto de *+MediaPipe** y la entrada del clasificador.   
-El *objetivo* es hacer que los datos sean agnósticos respecto a la posición y a la distancia de la mano, garantizando que el modelo aprenda la forma del gesto y no su posición en el espacio.
+El archivo **utils.py** contiene la *lógica matemática de transformación de los datos*. Su función principal, *get_normalized_landmarks*, actúa como un filtro intermedio entre la extracción en bruto de *+MediaPipe** y la entrada del clasificador.  
+El *objetivo* es hacer que los datos sean agnósticos respecto a la posición y a la distancia de la **mano**, garantizando que el modelo aprenda la forma del gesto y no su posición en el espacio.
 
 **Funcionamiento técnico**  
 La función recibe como entrada el objeto **hand_landmarks** de MediaPipe y aplica una pipeline de transformación en tres fases:
 
 **1. Conversión a coordenadas relativas (invarianza a la traslación)**  
-Los datos en bruto de MediaPipe son coordenadas absolutas (x, y) normalizadas respecto a las dimensiones de la imagen (0.0 - 1.0). Si usáramos estos datos directamente, el modelo aprendería que una mano en la esquina superior izquierda es diferente de una mano en la esquina inferior derecha, aunque hagan el mismo gesto. Para resolver este problema, el código establece la muñeca (Landmark 0) como origen (0, 0) del sistema cartesiano local. Resta las coordenadas de la muñeca a todos los demás puntos:
+Los datos en bruto de MediaPipe son coordenadas absolutas (x, y) normalizadas respecto a las dimensiones de la imagen (0.0 - 1.0).   
+Si usáramos estos **datos** directamente, el modelo aprendería que una mano en la **esquina superior izquierda** es diferente de una mano en la **esquina inferior derecha**, aunque hagan el mismo gesto.  
+Para resolver este problema, el código establece la muñeca (*Landmark 0*) como origen (*0, 0*) del sistema cartesiano local.  
+Resta las coordenadas de la muñeca a todos los demás puntos:
 
 ```python
 P'{i} = P{i} - P_{polso}
@@ -347,7 +340,7 @@ temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y
 
 
 **2. Flattening (aplanamiento)**  
-Los datos se convierten de una lista de parejas bidimensionales [[x1, y1], [x2, y2]...] a un único vector unidimensional [x1, y1, x2, y2...].
+Los datos se convierten de una lista de parejas bidimensionales [**[x1, y1], [x2, y2]...**] a un único vector unidimensional [**x1, y1, x2, y2...**].
 
 Aplana la lista utilizando itertools.
 ```python
@@ -355,9 +348,11 @@ temp_landmark_list = list(itertools.chain.from_iterable(temp_landmark_list))
 ```
 
 **3. Normalización de escala (invarianza a la escala)**
-La **mano** puede estar cerca de la cámara (coordenadas grandes) o lejos (coordenadas pequeñas). Para hacer que el gesto sea reconocible independientemente de la distancia, los valores se normalizan dividiendo todo por el valor absoluto máximo presente en el vector. Esto fuerza a que todos los datos queden dentro de un rango entre − 1 y 1.
+La **mano** puede estar cerca de la cámara (coordenadas grandes) o lejos (coordenadas pequeñas).  
+Para hacer que el gesto sea reconocible independientemente de la distancia, los valores se normalizan dividiendo todo por el **valor absoluto máximo** presente en el vector.  
+Esto fuerza a que todos los datos queden dentro de un rango entre **− 1** y **1**.
 
-Normalizza tra -1 e 1
+Normalizza tra **-1 y 1**
 ```python
 max_value = max(list(map(abs, temp_landmark_list)))
 
@@ -381,10 +376,9 @@ En concreto, el notebook realiza tres tareas críticas:
 **Requisitos previos y librerías**
 Para la ejecución correcta, la estructura de directorios debe seguir la taxonomía de clases (por ejemplo data/A, data/B, etc.). Las librerías principales son:
 
-- MediaPipe: para la extracción de los landmark esqueléticos (el “corazón” del pre-processing).
-- OpenCV (cv2): para la manipulación de imágenes (conversión BGR -> RGB).
-- Pickle: para la serialización de objetos Python.
-- Matplotlib (opcional): para visualizar las imágenes durante el debug.
+- **MediaPipe**: para la extracción de los landmark esqueléticos (el “corazón” del pre-processing).
+- **OpenCV** (*cv2*): para la manipulación de imágenes (conversión BGR -> RGB).
+- **Pickle**: para la serialización de objetos Python.
 
 **Análisis de la estructura (detalle a nivel de código)**  
 Celda 1 – **Configuración del entorno**

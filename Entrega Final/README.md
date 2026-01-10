@@ -37,6 +37,172 @@ En particular:
 - hemos escrito scripts de Python para automatizar parte del proceso
 - hemos usado un notebook de Jupyter para explorar y verificar el dataset
 
+## Diario y Metodología de trabajo
+En lo que respecta al **diario** de este *proyecto final*, muy a menudo hemos trabajado de manera presencial, ya fuera después de las clases en la *biblioteca de la universidad* o en otra *biblioteca* cercana a **Las Canteras**.  
+Por la metodologís de trabajo hemos realizado casi todo el proyecto *juntos* y de *forma presencial*, para que ambos pudiéramos entender bien lo que hacía el otro y porque ante cualquier **problema** o **duda**, en *persona* se consigue resolver casi de inmediato, en lugar de hacerlo por *teléfono*.    
+Las pocas veces en las que no conseguíamos encontrarnos en persona, utilizábamos **videollamadas por WhatsApp** o, cuando uno podía y el otro no, trabajábamos de **forma individual** enviándonos mensajes cada vez que se realizaba alguna modificación o avance.
+
+Progetto: Traduttore di Lingua dei Segni Spagnola (LSE) basato su Computer Vision
+1. Setup dell’Ambiente di Sviluppo
+Per garantire riproducibilità e isolamento delle dipendenze, il progetto è stato sviluppato all’interno di un ambiente virtuale Anaconda.
+
+conda create -n progetto_vc python=3.10
+conda activate progetto_vc
+pip install mediapipe==0.10.9
+pip install pyttsx3
+pip install pillow
+La versione di Python 3.10 è stata scelta per garantire piena compatibilità con MediaPipe e le librerie di supporto.
+
+2. Dataset: Costruzione e Unione delle Fonti
+Abbiamo utilizzato e unificato due dataset pubblici scaricati da Kaggle:
+* Spanish Sign Language Alphabet Static
+* Lenguaje de Signos Español
+L’obiettivo dell’unione è stato aumentare la varietà delle mani, delle angolazioni e delle condizioni di illuminazione, migliorando la capacità di generalizzazione del modello.
+Durante lo sviluppo ci siamo accorti che alcune lettere (Y, X, W, V, T, H, F) risultavano poco affidabili. Per questo motivo:
+* abbiamo raccolto manualmente nuove immagini tramite webcam (script collect_data.py);
+* abbiamo sostituito progressivamente parte delle immagini dei dataset originali con dati raccolti da noi, più coerenti con l’ambiente reale di utilizzo.
+
+3. Pre-processing e Standardizzazione dei Dati (utils.py)
+Il file utils.py rappresenta il cuore matematico del progetto: funge da “traduttore” tra la visione artificiale e il modello di Machine Learning.
+3.1 Obiettivi del Pre-processing
+Il pre-processing è stato progettato per garantire:
+* Invarianza alla traslazione Il gesto deve essere riconosciuto indipendentemente dalla posizione della mano nell’immagine.
+* Invarianza di scala Il gesto deve essere riconosciuto sia con la mano vicina che lontana dalla webcam.
+* Compatibilità con modelli di Machine Learning I dati devono essere trasformati in un vettore numerico adatto a un classificatore.
+3.2 Pipeline di Elaborazione
+La funzione pre_process_landmark applica i seguenti passaggi:
+1. Copia di sicurezza Viene creata una deepcopy dei landmark per evitare di modificare i dati usati per il rendering grafico.
+2. Relativizzazione delle coordinate
+    * Il landmark 0 (polso) viene fissato come origine (0,0).
+    * Tutti gli altri punti vengono espressi come differenza rispetto al polso.
+3. Flattening La lista di coppie (x, y) viene trasformata in un unico vettore monodimensionale.
+4. Normalizzazione Tutti i valori vengono scalati nell’intervallo [-1, 1], migliorando la stabilità numerica e la convergenza del modello.
+Output finale: Un vettore di numeri reali pronto per essere fornito al classificatore.
+
+4. Estrazione delle Feature (create_dataset.ipynb)
+Questo notebook ha il compito di trasformare le immagini grezze in dati numerici.
+Pipeline:
+1. Caricamento delle immagini organizzate per classe (A, B, C, …).
+2. Rilevamento dei 21 landmark della mano tramite MediaPipe Hands.
+3. Applicazione del pre-processing definito in utils.py.
+4. Salvataggio dei dati in formato numerico.
+Risultato: un dataset strutturato e pronto per l’addestramento.
+
+5. Addestramento del Modello (train_classifier.ipynb)
+5.1 Scelte di Progetto
+È stato utilizzato un Random Forest Classifier perché:
+* è robusto al rumore;
+* non richiede feature engineering complesso;
+* funziona bene con dataset di dimensioni medio-piccole.
+5.2 Fasi di Training
+* Suddivisione dei dati:
+    * 80% Training Set
+    * 20% Test Set
+* Addestramento del modello
+* Valutazione tramite accuracy score
+Se l’accuratezza supera il 95%, il modello viene esportato come file statico:
+
+model.p
+Questo file rappresenta il “cervello” dell’applicazione finale.
+
+6. Applicazione in Tempo Reale (inference_classifier.py)
+Questo è il file esecutivo, quello che l’utente finale utilizza.
+6.1 Funzionalità Principali
+* Acquisizione video dalla webcam
+* Rilevamento della mano
+* Conversione dei dati visivi in dati matematici
+* Predizione del segno
+* Interfaccia grafica aumentata
+6.2 Pipeline Logica
+Fase A – Setup
+* Caricamento del modello model.p (se presente).
+* Modalità fallback se il modello non è disponibile.
+Fase B – Detection
+* MediaPipe individua i 21 landmark.
+* Disegno dello scheletro della mano a schermo.
+Fase C – Ponte Visione → AI
+* Conversione coordinate normalizzate → pixel.
+* Pre-processing tramite utils.py.
+Fase D – Inference
+* Predizione numerica del modello.
+* Traduzione numero → lettera tramite dizionario.
+Output visivo:
+* Webcam live
+* Bounding box della mano
+* Lettera riconosciuta
+
+7. Problema Critico: Distinzione tra T e F (Profondità)
+Le lettere T e F risultano quasi indistinguibili in 2D (effetto “ombra cinese”).
+7.1 Analisi del Problema
+* In una webcam 2D le coordinate (x, y) sono quasi identiche.
+* Aggiungere immagini al dataset portava a overfitting.
+7.2 Soluzione Algoritmica
+Abbiamo sfruttato la coordinata Z stimata da MediaPipe:
+* Calcolo della differenza di profondità tra:
+    * punta dell’indice
+    * punta del pollice
+Regola:
+* indice più vicino alla camera → F
+* indice allineato o dietro → T
+7.3 Calibrazione Sperimentale
+* F: valori fino a -0.036
+* T: valori ~ -0.024
+* Soglia finale: -0.028
+Risultato: distinzione stabile e riproducibile senza riaddestrare il modello.
+
+8. Modalità Scrittura e Gestione dei Comandi
+Abbiamo introdotto segni speciali per:
+1. Entrare / uscire dalla modalità scrittura
+2. Inserire spazi
+3. Cancellare tutto
+4. Cancellare ultimo carattere
+5. Inserire il punto interrogativo
+Questo trasforma il riconoscitore in un vero sistema di scrittura gestuale.
+
+9. Text-to-Speech (Accessibilità)
+Per rendere il sistema realmente utile a persone con difficoltà vocali, abbiamo integrato la sintesi vocale.
+* Libreria: pyttsx3 (offline)
+* Voce: spagnola (ricerca automatica nel sistema)
+* Attivazione: uscita dalla modalità scrittura
+Quando l’utente termina la frase, il sistema legge ad alta voce il testo prodotto.
+
+10. Supporto Unicode (Ñ, ¿)
+OpenCV non supporta correttamente caratteri Unicode. Abbiamo quindi integrato Pillow per il rendering del testo:
+* Supporto completo a:
+    * Ñ
+    * ¿
+* Font reali (Arial)
+* Testo pulito e leggibile
+
+11. Suggeritore Predittivo (NLP Lite)
+Abbiamo implementato un sistema di suggerimento lessicale:
+* Dizionario interno con ~100 parole spagnole frequenti
+* Analisi dell’ultima parola in tempo reale
+* Visualizzazione di suggerimenti dinamici
+Interazione Touchless
+I suggerimenti sono cliccabili senza mouse:
+* Hover con l’indice
+* Barra di caricamento temporale
+* Selezione automatica
+
+12. Interfaccia Grafica: Icona del Microfono
+Abbiamo aggiunto un feedback visivo tramite icone PNG con trasparenza:
+* mic_blue.png → stato idle
+* mic_yellow.png → hover
+* mic_green.png → parlato
+Se le icone non sono presenti, il sistema usa un fallback grafico, evitando crash.
+
+13. Risultato Finale
+Il progetto integra:
+* Computer Vision
+* Machine Learning
+* Sintesi vocale
+* NLP
+* Interfaccia touchless
+Non si tratta solo di “usare una libreria”, ma di progettare un sistema completo, robusto e orientato all’accessibilità.
+
+
+
 ## Estructura del proyecto
 
 La estructura principal del repositorio es la siguiente:
@@ -597,10 +763,6 @@ Questo garantisce che un singolo frame corrotto non termini l'applicazione.
 
 
 
-## Diario y Metodología de trabajo
-En lo que respecta al **diario** de este *proyecto final*, muy a menudo hemos trabajado de manera presencial, ya fuera después de las clases en la *biblioteca de la universidad* o en otra *biblioteca* cercana a **Las Canteras**.  
-Por la metodologís de trabajo hemos realizado casi todo el proyecto *juntos* y de *forma presencial*, para que ambos pudiéramos entender bien lo que hacía el otro y porque ante cualquier **problema** o **duda**, en *persona* se consigue resolver casi de inmediato, en lugar de hacerlo por *teléfono*.    
-Las pocas veces en las que no conseguíamos encontrarnos en persona, utilizábamos **videollamadas por WhatsApp** o, cuando uno podía y el otro no, trabajábamos de **forma individual** enviándonos mensajes cada vez que se realizaba alguna modificación o avance.
 
 
 ## Tecnologie utilizzate

@@ -81,7 +81,7 @@ Los datos deben transformarse en un vector numérico adecuado para un clasificad
 
 3.2 **Pipeline de Procesamiento**
 
-La función **pre_process_landmark** aplica los siguientes pasos:
+La función **get_normalized_landmarks** aplica los siguientes pasos:
 
 1. **Copia de seguridad**
 Se crea una deepcopy de los landmarks para evitar modificar los datos utilizados para el renderizado gráfico.

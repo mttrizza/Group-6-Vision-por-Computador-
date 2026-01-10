@@ -514,7 +514,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 2. **Gestión dinámica de clases** (File System)  
 El código no requiere pre-crear las carpetas manualmente. Usando la librería os, el script verifica la entrada del teclado y gestiona automáticamente la estructura de directorios.  
-Si el usuario pulsa la tecla "**A**", el script comprueba la existencia de la carpeta **./data/raw/A**, la crea si es necesario, y calcula el nombre progresivo del archivo para evitar sobrescrituras.
+Si el usuario pulsa la tecla "**A**", el script comprueba la existencia de la carpeta **./data/raw/A**, la crea si es necesario, y calcula el nombre progresivo del archivo para evitar sobrescrituras. 
 
 ```python
 # Convertimos el código de la tecla en letra (ej. 97 -> 'a' -> 'A')

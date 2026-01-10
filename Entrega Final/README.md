@@ -94,7 +94,7 @@ Pipeline:
 
 **Resultado**: un dataset estructurado y listo para el entrenamiento.
 
-## 5. Entrenamiento del Modelo (train_classifier.ipynb)
+## 5. Entrenamiento del Modelo con train_classifier.ipynb
 
 5.1 **Elecciones de Proyecto**
 
@@ -118,7 +118,7 @@ Si la precisión supera el **95%**, el modelo se exporta como archivo estático:
 
 Este archivo representa el **“cerebro”** de la aplicación final.
 
-## 6. Aplicación en Tiempo Real con inference_classifier.py
+## 6. Aplicación en Tiempo Real con traductorRBMR.py
 
 Este es el **archivo ejecutable**, el que utiliza el usuario final.
 

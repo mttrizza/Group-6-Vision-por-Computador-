@@ -965,11 +965,11 @@ Como soporte a la productividad y la internacionalización del proyecto, se han 
 ---
 
 ## Propuestas de ampliación
-- Transición a la Lengua de Signos real: Evolucionar del simple deletreo letra a letra (dactilología) al reconocimiento de la verdadera lengua de signos (palabras completas, verbos y estructuras gramaticales), lo que requerirá análisis de gestos dinámicos y uso de ambas manos.
+- **Transición a la Lengua de Signos real**: Evolucionar del simple deletreo letra a letra (dactilología) al reconocimiento de la verdadera lengua de signos (palabras completas, verbos y estructuras gramaticales), lo que requerirá análisis de gestos dinámicos y uso de ambas manos.
 
-- Soporte Multi-idioma: Posibilidad de modificar el idioma de interacción, adaptando automáticamente tanto el diccionario predictivo como el modelo de reconocimiento a las variantes regionales (ej. ASL vs LSE).
+- **Soporte Multi-idioma**: Posibilidad de modificar el idioma de interacción, adaptando automáticamente tanto el diccionario predictivo como el modelo de reconocimiento a las variantes regionales (ej. ASL vs LSE).
 
-- Escalabilidad del Léxico: Ampliar masivamente el diccionario interno para cubrir un vocabulario de uso general, superando las limitaciones del set de palabras actual.
+- **Escalabilidad del Léxico**: Ampliar masivamente el diccionario interno para cubrir un vocabulario de uso general, superando las limitaciones del set de palabras actual.
 
 ## Conclusión
 Este proyecto nos ha resultado muy útil para aprender nuevas formas de aplicar las tecnologías vistas en clase en un contexto real y significativo. En particular, la idea de integrar un diccionario con palabras sugeridas para facilitar la escritura ha sido una manera concreta de reflexionar sobre los sistemas de asistencia che utilizamos desde hace años en nuestros dispositivos móviles, entendiendo mejor la lógica y el diseño que hay detrás de este tipo de interfaces.  

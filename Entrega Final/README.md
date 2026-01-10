@@ -414,28 +414,34 @@ except Exception as e: print(f"Errore Audio: {e}")
 
 **El motor NLP (Natural Language Processing)**
 
-Por último, para soportar la funcionalidad de **“Sugeridor Inteligente”**, se implementó un motor **NLP** ligero basado en diccionario.  
-La elección de no utilizar redes neuronales pesadas (como LSTM o Transformers) para esta tarea está dictada por la necesidad de mantener baja la latencia.
+Por último, para elevar la experiencia de usuario con la funcionalidad de “Sugeridor Inteligente”, se implementó un motor de NLP ligero y determinista.
 
-El diccionario "**DICCIONARIO**" actúa como una *Knowledge Base* estática. La función get_suggestions_list ejecuta una operación de string-matching optimizada sobre la última palabra parcial introducida:
+La decisión técnica de no utilizar redes neuronales profundas (como LSTM, Transformers o BERT) para esta tarea específica fue dictada por la necesidad de priorizar la baja latencia. En un sistema de visión artificial que ya consume recursos de GPU/CPU para procesar 30 imágenes por segundo, añadir un modelo de lenguaje pesado habría comprometido la fluidez del vídeo.
+
+Estructura y Algoritmo: El sistema se apoya en una Knowledge Base estática (la lista DICCIONARIO), que ha sido curada manualmente para incluir:
+- Palabras de uso común (HOLA, GRACIAS, POR FAVOR).
+- Vocabulario específico del contexto académico/universitario (PROYECTO, PROFESOR, EXAMEN, VISIÓN).
+
+La función get_suggestions_list implementa un algoritmo de Búsqueda de Prefijos (Prefix Matching). Analiza la frase en construcción en tiempo real y aísla el último fragmento escrito para ofrecer candidatos compatibles.
 
 ```python
 def get_suggestions_list(current_sentence):
     if not current_sentence: return []
     parts = current_sentence.split(" ")
-    last_fragment = parts[-1]
+    last_fragment = parts[-1] # Aísla el sufijo actual (ej. "PR")
     if len(last_fragment) == 0: return [] 
     matches = []
     for word in DICCIONARIO:
+        # Busca palabras que empiecen por el fragmento (startswith)
+        # y evita sugerir la palabra si ya está completa
         if word.startswith(last_fragment) and word != last_fragment:
             matches.append(word)
+            # Optimización: Early Exit al encontrar 3 candidatos para no saturar la UI
             if len(matches) >= 3: break 
     return matches
 ```
 
 Este diseño permite obtener sugerencias instantáneas (complejidad computacional mínima) que se actualizan frame a frame mientras el usuario compone el gesto.
-
-El núcleo operativo del script está encapsulado en un **bucle infinito** (while True), que gestiona la sincronización entre la adquisición del mundo real (Webcam) y el renderizado de la información digital **(GUI)**.
 
 **Adquisición y normalización del flujo de vídeo** 
 

@@ -251,7 +251,7 @@ Por ello se integró **Pillow** para el renderizado del texto:
 
 Se implementó un sistema de **sugerencia léxica**:
 
-- Diccionario interno con **~100 palabras** *frecuentes* en español
+- Diccionario interno con **~350 palabras** *frecuentes* en español
 - Análisis de la última palabra en tiempo real
 - Visualización de sugerencias dinámicas
 

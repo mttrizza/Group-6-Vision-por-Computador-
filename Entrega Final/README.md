@@ -296,7 +296,7 @@ La carpeta /data/raw es una carpeta temporal en la que guardábamos las imágene
 ### utils.py
 
 **Objetivo del módulo**
-El archivo **utils.py** contiene la *lógica matemática de transformación de los datos*. Su función principal, *get_normalized_landmarks*, actúa como un filtro intermedio entre la extracción en bruto de *+MediaPipe** y la entrada del clasificador.  
+El archivo **utils.py** contiene la *lógica matemática de transformación de los datos*. Su función principal, *get_normalized_landmarks*, actúa como un filtro intermedio entre la extracción en bruto de **MediaPipe** y la entrada del clasificador.  
 
 El *objetivo* es hacer que los datos sean agnósticos respecto a la posición y a la distancia de la **mano**, garantizando que el modelo aprenda la forma del gesto y no su posición en el espacio.
 

@@ -365,8 +365,10 @@ temp_landmark_list = list(map(normalize_, temp_landmark_list))
 ### create_database.ipynb
 
 **Objetivo del notebook**  
-Este script constituye la fase de **Pre-processing** y **Feature Extraction** de la pipeline de Computer Vision. El objetivo no es simplemente leer las imágenes, sino transformar los datos no estructurados (píxeles de las imágenes raw) en datos estructurados (coordenadas geométricas de los landmark de la mano), listos para el entrenamiento de un clasificador (por ejemplo Random Forest).
+Este script constituye la fase de **Pre-processing** y **Feature Extraction** de la pipeline de Computer Vision.  
 
+El objetivo no es simplemente leer las imágenes, sino transformar los datos no estructurados (píxeles de las imágenes raw) en datos estructurados (coordenadas geométricas de los landmark de la mano), listos para el entrenamiento de un clasificador (por ejemplo Random Forest).
+  
 En concreto, el notebook realiza tres tareas críticas:
 
 1. **Iteración**: Escanea el dataset organizado en directorios.  
@@ -381,7 +383,8 @@ Para la ejecución correcta, la estructura de directorios debe seguir la taxonom
 - **Pickle**: para la serialización de objetos Python.
 
 **Análisis de la estructura (detalle a nivel de código)**  
-Celda 1 – **Configuración del entorno**
+Celda 1 – **Configuración del entorno**  
+
 Se definen las rutas y se inicializa el modelo estático de MediaPipe. A diferencia del script en tiempo real, aquí configuramos MediaPipe con static_image_mode=True, optimizado para imágenes individuales con alta precisión.
 
 ```python
@@ -392,6 +395,7 @@ DATA_DIR = './data'
 ```
 
 Celda 2 – **Extracción de las features (Core Loop)**  
+
 Esta es la sección computacionalmente más intensa. El código itera sobre cada subcarpeta (que representa una clase/letra) y para cada imagen ejecuta la conversión.
 
 Pasos técnicos relevantes para cada imagen:
@@ -408,6 +412,7 @@ results = hands.process(img_rgb)
 ```
 
 3. **Feature Extraction & Normalización** (crucial):
+
 si se detecta una mano, no nos limitamos a extraer coordenadas crudas (x, y respecto a los bordes de la imagen). En su lugar, se invoca la función *custom get_normalized_landmarks*
 
 ```python
@@ -418,7 +423,7 @@ if results.multi_hand_landmarks:
             labels.append(dir_)
 ```
 
-Celda 3 – **Serialización de los datos**
+Celda 3 – **Serialización de los datos**  
 Los datos procesados se guardan. Este paso crea un “checkpoint”. Si en el futuro se quiere cambiar el modelo de clasificación (por ejemplo pasar de Random Forest a SVM o Red Neuronal), no será necesario reprocesar todas las imágenes, sino que bastará con cargar este archivo pickle.
 
 ```python

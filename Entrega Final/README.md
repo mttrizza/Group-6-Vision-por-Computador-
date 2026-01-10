@@ -283,8 +283,8 @@ Progetto_VC/
 │ │ ├── W/
 │ │ ├── X/
 │ │ └── Y/
-│ │
-│ └── new_data/
+│ └──
+│ 
 │
 │
 └── .DS_Store

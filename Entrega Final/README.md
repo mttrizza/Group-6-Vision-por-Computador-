@@ -578,20 +578,22 @@ Otra *limitación crítica* de **OpenCV** es la falta de soporte para **conjunto
 Para resolver el problema, se creó la función **wrapper put_text_utf8**.  
 Esta función actúa como un puente entre dos librerías gráficas distintas:
 
-1. Convierte el frame de vídeo del formato OpenCV (array NumPy) al formato Pillow (PIL Image):
+1. Convierte el **frame de vídeo** del formato **OpenCV** (*array NumPy**) al formato **Pillow** (*PIL Image*):
 
 ```python
 img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 ```
 
-2. Utiliza el motor de renderizado de Pillow para dibujar el texto usando una fuente TrueType (arial.ttf), que soporta nativamente todos los glifos internacionales.
+2. Utiliza el motor de renderizado de **Pillow** para dibujar el texto usando una fuente **TrueType** (*arial.ttf*), que soporta nativamente todos los glifos internacionales.
 
-3. Reconvierten la imagen procesada al formato BGR de OpenCV para poder mostrarla en vídeo.
+3. Reconvierten la **imagen procesada** al formato **BGR** de **OpenCV** para poder mostrarla en *vídeo*.
 
-Este enfoque híbrido garantiza que la interfaz de usuario sea lingüísticamente correcta sin sacrificar el rendimiento de la pipeline de vídeo.
-Además de la conversión de formatos, la función implementa dos mecanismos de seguridad importantes:
+Este **enfoque híbrido** garantiza que la interfaz de usuario sea lingüísticamente correcta sin sacrificar el rendimiento de la pipeline de vídeo.
+Además de la **conversión de formatos**, la función implementa dos mecanismos de seguridad importantes:
 
-1) Fallback de Tipografía (Portabilidad): El sistema intenta cargar la fuente vectorial arial.ttf para asegurar una estética moderna. Sin embargo, dado que las fuentes disponibles varían según el sistema operativo, se encapsuló la carga en un bloque de manejo de errores. Si el archivo no se encuentra, el sistema carga automáticamente una fuente predeterminada en lugar de detener la ejecución:
+1.  **Fallback de Tipografía** *(Portabilidad)*: El sistema intenta cargar la fuente vectorial *arial.ttf* para asegurar una **estética moderna**. Sin embargo, dado que las fuentes disponibles varían según el sistema operativo, se encapsuló la carga en un **bloque de manejo de errores**.  
+Si el archivo no se encuentra, el sistema carga automáticamente una fuente predeterminada en lugar de detener la ejecución:
+
 ```python
 try:
     font = ImageFont.truetype("arial.ttf", font_size)
@@ -599,7 +601,9 @@ except IOError:
     # Mecanismo de seguridad si falta la fuente
     font = ImageFont.load_default()
 ```
-2) Corrección del Espacio de Color: Existe una discrepancia entre cómo las librerías interpretan los colores: OpenCV utiliza el estándar BGR (Blue-Green-Red), mientras que Pillow utiliza RGB. Si pasáramos el color directamente, el texto rojo aparecería azul y viceversa. Por ello, el código realiza una inversión manual de los canales de color antes de dibujar:
+
+2.  **Corrección del Espacio de Color**: Existe una discrepancia entre cómo las librerías interpretan los colores: **OpenCV** utiliza el **estándar BGR (Blue-Green-Red)**, mientras que **Pillow** utiliza **RGB**. Si pasáramos el color directamente, el texto rojo aparecería azul y viceversa.  
+Por ello, el código realiza una inversión manual de los canales de color antes de dibujar:
 ```python
 # Inversión de canales: de BGR (OpenCV) a RGB (Pillow)
 color_rgb = (color[2], color[1], color[0])
@@ -607,28 +611,36 @@ color_rgb = (color[2], color[1], color[0])
 
 **Gestión Asíncrona del Audio y Arquitectura Multihilo** (*Multithreading*)  
 
-Uno de los desafíos críticos en los sistemas interactivos en tiempo real es la gestión de la latencia. La operación más costosa en términos de tiempo de ejecución no es el reconocimiento de imagen, sino la síntesis vocal.
+Uno de los **desafíos críticos** en los sistemas interactivos en tiempo real es la gestión de la **latencia**. La operación más costosa en términos de tiempo de ejecución no es el reconocimiento de imagen, sino la *síntesis vocal*.
 
-La librería pyttsx3 opera nativamente en modo bloqueante: la función engine.runAndWait() detiene la ejecución del procesador hasta que la frase completa ha sido pronunciada. Si el ordenador debe decir "Hola, ¿cómo estás?", el proceso tarda entre 2 y 3 segundos. En una arquitectura de un solo hilo (Single-Threaded), esto implicaría congelar el flujo de vídeo de la webcam durante ese tiempo, destruyendo la experiencia de usuario.
+La librería **pyttsx3** opera nativamente en modo bloqueante: la función **engine.runAndWait()** detiene la ejecución del procesador hasta que la frase completa ha sido pronunciada.  
+Si el ordenador debe decir *"Hola, ¿cómo estás?"*, el proceso tarda entre **2 y 3 segundos**.  
+En una arquitectura de un solo hilo (*Single-Threaded*), esto implicaría congelar el flujo de vídeo de la webcam durante ese tiempo, destruyendo la experiencia de usuario.
 
-Para resolver este cuello de botella y mantener el sistema fluido a 30 FPS, se implementó una arquitectura Multihilo (Multithreading) que desacopla el bucle de renderizado (Vídeo) del bucle de procesamiento (Audio).
-1. Orquestación de Hilos (run_voice_thread)
-La función run_voice_thread actúa como el punto de entrada para la ejecución concurrente. En lugar de ejecutar el audio directamente, instancia un Worker Thread:
+Para resolver este cuello de botella y mantener el sistema fluido a **30 FPS**, se implementó una arquitectura **Multihilo (Multithreading)** que desacopla el bucle de renderizado (**Vídeo**) del bucle de procesamiento (**Audio**).
+
+1. **Orquestación de Hilos (run_voice_thread)**
+La función **run_voice_thread** actúa como el punto de entrada para la ejecución concurrente.  
+En lugar de ejecutar el audio directamente, instancia un Worker Thread:
+
 ```python
 def run_voice_thread(text):
     t = threading.Thread(target=speak_function, args=(text, VOICE_ID_MANUALE))
     t.start()
 ```
-Desacoplamiento: Al invocar t.start(), el sistema operativo crea un nuevo flujo de ejecución paralelo.
 
-Resultado: El Main Thread (encargado del vídeo y la IA) queda libre inmediatamente para procesar el siguiente frame, mientras que el audio se procesa en segundo plano.
+*Desacoplamiento*: Al invocar **t.start()**, el sistema operativo crea un nuevo flujo de ejecución paralelo.
 
-2. Lógica de Configuración Dinámica (speak_function)
-La función speak_function, que se ejecuta dentro del hilo secundario, no se limita a reproducir sonido. Implementa una lógica robusta de autconfiguración y localización para garantizar que el sistema funcione correctamente en diferentes ordenadores.
+**Resultado**: El **Main Thread** (encargado del vídeo y la IA) queda libre inmediatamente para procesar el siguiente *frame*, mientras que el audio se procesa en segundo plano.
+
+2. **Lógica de Configuración Dinámica (speak_function)**
+La función **speak_function**, que se ejecuta dentro del hilo secundario, no se limita a reproducir sonido. Implementa una *lógica robusta* de autconfiguración y localización para garantizar que el sistema funcione correctamente en diferentes ordenadores.
 
 Analizando el código, vemos tres pasos clave:
 
-A. Selección Automática del Idioma: Dado que el proyecto está diseñado para la Lengua de Signos Española, el sistema no asume una configuración predeterminada. En su lugar, itera sobre los drivers de voz instalados en el sistema operativo buscando explícitamente una voz hispana:
+A. **Selección Automática del Idioma**: Dado que el proyecto está diseñado para la Lengua de Signos Española, el sistema no asume una configuración predeterminada.  
+En su lugar, itera sobre los drivers de **voz** instalados en el sistema operativo buscando explícitamente una **voz hispana**: 
+
 ```python
 voices = engine.getProperty('voices')
 for v in voices:
@@ -637,28 +649,32 @@ for v in voices:
         engine.setProperty('voice', v.id)
         break
 ```
-Este algoritmo de búsqueda garantiza la portabilidad del software: funcionará tanto en un Windows configurado en inglés como en uno en español, siempre que exista un paquete de voz compatible.
 
-B. Configuración de Velocidad: Se ajusta la velocidad de habla (rate) a 140 palabras por minuto para asegurar una dicción clara y natural, adecuada para fines educativos o de asistencia.
+Este **algoritmo** de búsqueda garantiza la portabilidad del software: funcionará tanto en un Windows configurado en inglés como en uno en español, siempre que exista un paquete de voz compatible.
+
+B. **Configuración de Velocidad**: Se ajusta la velocidad de habla (rate) a **140 palabras** por minuto para asegurar una dicción clara y natural, adecuada para fines educativos o de asistencia.
+
 ```python
 engine.setProperty('rate', 140)
 ```
-C. Tolerancia a Fallos: Toda la lógica de audio está encapsulada en un bloque try...except.
+
+C. **Tolerancia a Fallos**: Toda la lógica de audio está encapsulada en un bloque try...except.
 ```python
 except Exception as e: print(f"Errore Audio: {e}")
 ```
 
 **El motor NLP (Natural Language Processing)**
+Por último, para elevar la experiencia de usuario con la funcionalidad de “**Sugeridor Inteligente**”, se implementó un motor de **NLP ligero y determinista**.
 
-Por último, para elevar la experiencia de usuario con la funcionalidad de “Sugeridor Inteligente”, se implementó un motor de NLP ligero y determinista.
+La decisión técnica de no utilizar **redes neuronales profundas** (como LSTM, Transformers o BERT) para esta tarea específica fue dictada por la necesidad de priorizar la baja latencia.   
+En un sistema de visión artificial que ya consume recursos de **GPU/CPU** para procesar *30 imágenes por segundo*, añadir un modelo de lenguaje pesado habría comprometido la fluidez del vídeo.
 
-La decisión técnica de no utilizar redes neuronales profundas (como LSTM, Transformers o BERT) para esta tarea específica fue dictada por la necesidad de priorizar la baja latencia. En un sistema de visión artificial que ya consume recursos de GPU/CPU para procesar 30 imágenes por segundo, añadir un modelo de lenguaje pesado habría comprometido la fluidez del vídeo.
+**Estructura y Algoritmo:** El sistema se apoya en una **Knowledge Bas**e estática (la lista **DICCIONARIO**), que ha sido curada manualmente para incluir:
+- Palabras de uso común (*HOLA*, *GRACIAS*, *POR FAVOR*).
+- Vocabulario específico del contexto académico/universitario (*PROYECTO*, *PROFESOR*, *EXAMEN*, *VISIÓN*).
 
-Estructura y Algoritmo: El sistema se apoya en una Knowledge Base estática (la lista DICCIONARIO), que ha sido curada manualmente para incluir:
-- Palabras de uso común (HOLA, GRACIAS, POR FAVOR).
-- Vocabulario específico del contexto académico/universitario (PROYECTO, PROFESOR, EXAMEN, VISIÓN).
-
-La función get_suggestions_list implementa un algoritmo de Búsqueda de Prefijos (Prefix Matching). Analiza la frase en construcción en tiempo real y aísla el último fragmento escrito para ofrecer candidatos compatibles.
+La función **get_suggestions_list** implementa un algoritmo de **Búsqueda de Prefijos** (Prefix Matching).   
+Analiza la frase en construcción en tiempo real y aísla el último fragmento escrito para ofrecer candidatos compatibles.
 
 ```python
 def get_suggestions_list(current_sentence):
@@ -677,90 +693,117 @@ def get_suggestions_list(current_sentence):
     return matches
 ```
 
-Este diseño permite obtener sugerencias instantáneas (complejidad computacional mínima) que se actualizan frame a frame mientras el usuario compone el gesto.
+Este diseño permite obtener sugerencias instantáneas que se actualizan frame a frame mientras el usuario compone el gesto.
 
 **Arquitectura del Ciclo de Ejecución (Runtime Loop)**
 Una vez inicializados los subsistemas de soporte (Gráficos, Audio, NLP), el control del programa pasa al núcleo operativo.
 
-El script está encapsulado en un bucle infinito (while True), que actúa como orquestador central gestionando la sincronización estricta entre la adquisición del mundo real (Webcam) y el renderizado de la información digital (GUI).
+El *script* está encapsulado en un bucle infinito (while True), que actúa como orquestador central gestionando la sincronización estricta entre la adquisición del mundo real (**Webcm**) y el renderizado de la información digital (**GUI**).
 
 **Adquisición y normalización del flujo de vídeo** 
-Al inicio de cada iteración, el sistema adquiere el frame bruto de la cámara.
+Al inicio de cada iteración, el sistema adquiere el frame bruto de la cámara
+
 ```python
 while True:
     ret, frame = cap.read()
     if not ret: break
 ```
-Sin embargo, antes de pasar a la fase de inferencia o dibujo, se ejecutan dos operaciones críticas de pre-processing para adecuar los datos:
 
-- Conversión de espacio de color: MediaPipe, al estar entrenado sobre datasets RGB, requiere este formato específico, mientras   que OpenCV adquiere nativamente en BGR. La conversión es necesaria para garantizar la precisión del modelo.
-- Mirroring (Efecto espejo): Esta operación es fundamental para la Usabilidad (UX). Sin el volteo horizontal (flip), mover la   mano física hacia la derecha provocaría un movimiento hacia la izquierda en la pantalla (como una cámara de vigilancia),     creando una disonancia cognitiva que haría imposible interactuar con los botones.
+Sin embargo, antes de pasar a la fase de inferencia o dibujo, se ejecutan dos operaciones críticas de **pre-processing** para adecuar los datos:
+
+- **Conversión de espacio de color**: **MediaPipe**, al estar entrenado sobre datasets *RGB*, requiere este formato específico, mientras   que OpenCV adquiere nativamente en BGR. La conversión es necesaria para garantizar la precisión del modelo.
+
+- **Mirroring** (*Efecto espejo*): Esta operación es fundamental para la Usabilidad (*UX*). Sin el volteo horizontal (*flip*), mover la   mano física hacia la derecha provocaría un movimiento hacia la izquierda en la pantalla (como una cámara de vigilancia), creando una disonancia cognitiva que haría imposible interactuar con los botones.
 
 **Renderizado de la Interfaz Dinámica (GUI)**
 La interfaz de usuario no es estática, sino contextual: cambia según el estado del sistema. El código utiliza una lógica condicional para decidir qué elementos dibujar en pantalla.
 
-Modo Escritura vs. Modo Traductor El booleano is_writing_mode actúa como un guardian gráfico:
-- Si es False (Traductor): La interfaz es minimalista (una barra gris), invitando al usuario a realizar el gesto de activación   ("ROCK").
+**Modo Escritura** vs. **Modo Traductor El booleano** *is_writing_mode* actúa como un guardian gráfico:
 
-- Si es True (Escritura): Se renderiza el "Dashboard" completo:
-  - La Barra Verde superior, que contiene la frase en construcción.
-  - El Botón de Micrófono, un objeto con estados (Azul = Reposo, Amarillo = Hover, Verde = Activo).
-  - Las Cajas de Sugerencias, generadas dinámicamente iterando sobre la lista current_suggestions.
+- Si es False (**Traductor**): La interfaz es minimalista (una barra gris), invitando al usuario a realizar el gesto de activación ("**ROCK**").
 
-Lógica de los Botones Virtuales (Interacción Sin Contacto) Uno de los aspectos más innovadores es la implementación de botones clicables sin contacto físico. Dado que no existe un ratón o pantalla táctil, el sistema debe simular el "clic" usando solo la posición de la mano mediante un algoritmo en tres fases: Mapping, Collision Detection y Temporal Filtering.
+- Si es True (Escritura): Se renderiza el "**Dashboard**" completo:
+  - La **Barra Verde** superior, que contiene la frase en construcción.
+  - El **Botón de Micrófono**, un objeto con estados (Azul = Reposo, Amarillo = Hover, Verde = Activo).
+  - Las **Cajas de Sugerencias**, generadas dinámicamente iterando sobre la lista current_suggestions.
 
-1)Mapeo de Coordenadas (Mapping): MediaPipe devuelve coordenadas normalizadas (0.0→1.0). Para interactuar con la GUI, estas deben proyectarse en el espacio de píxeles de la pantalla (1280×720):
+Lógica de los **Botones Virtuales** (*Interacción Sin Contacto*) Uno de los aspectos más innovadores es la implementación de botones clicables sin contacto físico.  
+Dado que **no existe** un ratón o pantalla táctil, el sistema debe simular el "*clic*" usando solo la posición de la mano mediante un algoritmo en tres fases: **Mapping**, **Collision Detection** y **Temporal Filtering**.
+
+1. **Mapeo de Coordenadas (Mapping)**:
+
+**MediaPipe** devuelve coordenadas normalizadas (0.0→1.0). Para interactuar con la GUI, estas deben proyectarse en el espacio de píxeles de la pantalla (**1280×720**):
+
 ```python
 index_x = int((1 - hand_landmarks.landmark[8].x) * W)
 index_y = int(hand_landmarks.landmark[8].y * H)
 ```
 
-2) Collision Detection (Rilevamento Collisioni)
-Detección de Colisiones (Collision Detection):
-El sistema verifica si el punto $(x,y)$ del dedo índice cae dentro del rectángulo de un botón (Bounding Box).
+2. **Detección de Colisiones (Collision Detection)**:
+
+El sistema verifica si el punto **(x,y)** del dedo índice cae dentro del rectángulo de un botón (*Bounding Box*).
+
 ```python
 if BTN_PARLA_X < index_x < (BTN_PARLA_X + BTN_PARLA_W) and 
    BTN_PARLA_Y < index_y < (BTN_PARLA_Y + BTN_PARLA_H):
        is_hovering_any_ui = True
 ```
-C. Filtrado Temporal (Dwell Time): El problema principal de las interfaces gestuales es el efecto "Midas Touch": el riesgo de clicar todo lo que se toca accidentalmente. Para evitar falsos positivos, se implementó un mecanismo de Dwell Time (tiempo de permanencia). El usuario debe mantener el dedo sobre el botón por un tiempo prefijado (ej. 1.0 segundo) para confirmar la intención.
 
-Se proporciona un Feedback Visual Progresivo: una barra de carga amarilla se dibuja proporcionalmente al tiempo transcurrido:
+3. **Filtrado Temporal (Dwell Time):**
+
+El problema principal de las interfaces gestuales es el efecto "**Midas Touch**": el riesgo de clicar todo lo que se toca accidentalmente. Para evitar **falsos positivos**, se implementó un mecanismo de **Dwell Time** (tiempo de permanencia).   
+El usuario debe mantener el dedo sobre el botón por un tiempo prefijado (ej. 1.0 segundo) para confirmar la intención.
+
+Se proporciona un **Feedback Visual Progresivo**: una barra de carga amarilla se dibuja proporcionalmente al tiempo transcurrido:
+
 ```python
 elapsed = time.time() - hover_start_time
 load_w = int((elapsed / 1.0) * BTN_W)
 cv2.rectangle(frame, ..., (BTN_X + load_w, ...), (0, 255, 255), -1)
 ```
-Solo cuando elapsed >= 1.0, se dispara el evento (ej. inicio del hilo de voz).
 
-4. Gestión Dinámica de Sugerencias
-Los botones de sugerencias se adaptan: si no hay sugerencias, desaparecen; si hay 3, aparecen alineados calculando sus coordenadas en tiempo real:
+Solo cuando **elapsed >= 1.0**, se dispara el evento
+
+4. **Gestión Dinámica de Sugerencias**
+
+Los **botones de sugerencias** se adaptan: 
+- si no hay sugerencias, desaparecen;
+- si hay 3, aparecen alineados calculando sus coordenadas en tiempo real:
+
 ```python
 for i, word in enumerate(current_suggestions):
     bx = SUGG_START_X + (SUGG_W + SUGG_GAP) * i
     # Renderizado del rectángulo y texto...
 ```
 
-Una vez que el sistema detecta que el usuario no está interactuando con los botones (es decir, is_hovering_any_ui == False), entra en juego el proceso de reconocimiento de gestos.
+Una vez que el sistema **detecta** que el usuario no está interactuando con los botones (es decir, is_hovering_any_ui == False), entra en juego el proceso de reconocimiento de gestos.
 
-Esta fase no se limita a preguntar «¿qué letra es?», sino que aplica una serie de filtros lógicos y temporales para corregir los errores típicos de la visión artificial.
-El primer paso es consultar el modelo Random Forest. En lugar de preguntar simplemente por la clase ganadora (model.predict), el código solicita las probabilidades (model.predict_proba).
+Esta fase no se limita a preguntar «*¿qué letra es?*», sino que aplica una serie de filtros lógicos y temporales para corregir los errores típicos de la visión artificial.  
+El **primer paso** es consultar el modelo **Random Forest**. En lugar de preguntar simplemente por la clase ganadora (*model.predict*), el código solicita las probabilidades (*model.predict_proba*).
+
 ```python
 features = get_normalized_landmarks(hand_landmarks)
 prediction_proba = model.predict_proba([np.asarray(features)])
 max_prob = np.max(prediction_proba)
 ```
-Esto permite implementar un filtro de confianza:
+
+Esto permite **implementar un filtro de confianza**:
+
 ```python
 if max_prob < MIN_CONFIDENCE:
     # Ignora el gesto si el modelo no es lo suficientemente seguro.
 ```
-Esto evita que el sistema escriba caracteres aleatorios cuando la mano está en transición o en una posición ambigua, lo que reduce drásticamente el «ruido» de fondo.
+
+Esto **evita** que el sistema escriba caracteres aleatorios cuando la mano está en transición o en una posición ambigua, lo que reduce drásticamente el «ruido» de fondo.
 
 #### Corrección de Errores y Post-Procesamiento
-Los modelos basados únicamente en imágenes 2D suelen confundir gestos similares. Para resolver este problema, se han inyectado en el código correctores lógicos basados en la geometría 3D y en el análisis temporal.
 
-A. Corrección Geométrica 3D (Distinción T vs F) Las letras 'T' y 'F' en el lenguaje de señas son muy similares visualmente, pero difieren en la profundidad (qué dedo está delante del otro). MediaPipe proporciona la coordenada Z (profundidad relativa). El código calcula la distancia relativa en el eje Z entre la punta del pulgar y la del índice:
+Los modelos basados únicamente en imágenes **2D** suelen confundir gestos similares. Para resolver este problema, se han inyectado en el código correctores lógicos basados en la geometría **3D** y en el análisis temporal.
+
+A. **Corrección Geométrica 3D** (*Distinción T vs F*) 
+Las letras **'T' y 'F'** en el lenguaje de señas son muy similares visualmente, pero difieren en la profundidad (qué dedo está delante del otro). **MediaPipe** proporciona la **coordenada Z** (*profundidad relativa*).   
+El código calcula la distancia relativa en el eje Z entre la punta del pulgar y la del índice:
+
 ```python
 diff_z = index_tip_z - thumb_tip_z
 # Si la diferencia de profundidad cruza el umbral...
@@ -769,7 +812,11 @@ if diff_z < UMBRAL_LIMIT:
 else:
     predicted_character = 'T'
 ```
-B. Análisis Temporal Dinámico (Distinción N vs Ñ) La 'N' y la 'Ñ' tienen la misma forma de mano, pero la 'Ñ' implica un movimiento ondulatorio lateral. Un clasificador estático no puede percibir el movimiento. Para solucionar esto, el sistema mantiene una memoria histórica (x_history) de las últimas 20 posiciones del la muñeca:
+
+B. **Análisis Temporal Dinámico (Distinción N vs Ñ)**
+La **'N' y la 'Ñ'** tienen la misma forma de mano, pero la **'Ñ'** implica un movimiento ondulatorio lateral.  
+Un clasificador estático no puede percibir el movimiento. Para solucionar esto, el sistema mantiene una memoria histórica (x_history) de las últimas **20 posiciones** del la muñeca:
+
 ```python
 x_history.append(wrist_x)
 if len(x_history) > 20:
@@ -780,18 +827,25 @@ movement = max(x_history) - min(x_history)
 if predicted_character == 'N' and movement > UMBRAL_MOVIMIENTO_N:
     predicted_character = 'Ñ'
 ```
-Si el sistema detecta la forma "N" PERO existe una oscilación significativa, "asciende" la predicción a "Ñ", convirtiendo un modelo estático en uno capaz de entender dinámicas temporales.
+
+Si el sistema detecta la forma "**N**" PERO existe una oscilación significativa, "asciende" la predicción a "**Ñ**", convirtiendo un modelo estático en uno capaz de entender dinámicas temporales.
 
 #### Estabilización Temporal (Anti-Flickering)
-Una vez determinada la letra (ej. "A"), no podemos escribirla inmediatamente. Los modelos de Machine Learning tienden a "parpadear" o fluctuar (ej. A-A-B-A-A) cientos de veces por segundo. Para evitar escribir "AAAAA" involuntariamente, se ha implementado un Temporizador de Confirmación (CONFIRMATION_TIME = 1.5 segundos). El sistema verifica la estabilidad de la predicción:
+Una vez determinada la letra (ej. "A"), no podemos escribirla inmediatamente. Los modelos de **Machine Learning** tienden a "parpadear" o fluctuar (ej. A-A-B-A-A) cientos de veces por segundo.  
+Para evitar escribir "AAAAA" involuntariamente, se ha implementado un **Temporizador de Confirmación** (*CONFIRMATION_TIME = 1.5 segundos*). El sistema verifica la estabilidad de la predicción:
+
 ```python
 is_stable = (predicted_character == last_char_detected)
 ```
-- Si la letra cambia: El temporizador se reinicia.
-- Si la letra permanece igual: El temporizador avanza.
-Durante la espera, el usuario recibe un feedback visual inmediato: un círculo de carga dibujado alrededor de la mano (cv2.ellipse), que se rellena progresivamente. Esto comunica al usuario: "He entendido que quieres hacer la A, mantenla quieta un momento más...".
 
-Para lograr este efecto, el código calcula el ángulo del arco basándose en el tiempo transcurrido y lo dibuja sobre el frame en tiempo real:
+- Si la letra cambia: El temporizador se **reinicia**
+- Si la letra permanece igual: El temporizador **avanza**
+
+Durante la espera, el usuario recibe un **feedback visual inmediato**: un **círculo** de carga dibujado alrededor de la mano (*cv2.ellipse*), que se rellena progresivamente.  
+Esto comunica al usuario: "*He entendido que quieres hacer la A, mantenla quieta un momento más..*.".
+
+Para **lograr** este efecto, el código calcula el ángulo del arco basándose en el tiempo transcurrido y lo dibuja sobre el frame en tiempo real:
+
 ```python
 # Cálculo del porcentaje de completado (0.0 a 1.0)
 progress = (time.time() - start_time) / CONFIRMATION_TIME
@@ -803,28 +857,41 @@ cv2.ellipse(frame, (wrist_x, wrist_y), (60, 60), -90, 0, angle, (0, 255, 0), 2)
 ```
 
 #### La Máquina de Estados (Ejecución de Comandos)
-Cuando el temporizador expira (elapsed >= CONFIRMATION_TIME), el sistema ejecuta la acción asociada al gesto reconocido. Aquí el código actúa como una máquina de estados finitos.
-Estado 1: Cambio de Modalidad (SWITCH) Si el gesto es "MODO_ESCRITURA" (Rock), invierte el estado booleano is_writing_mode.
+
+Cuando el temporizador expira (*elapsed >= CONFIRMATION_TIME*), el sistema ejecuta la acción asociada al gesto reconocido. Aquí el código actúa como una máquina de **estados finitos**.
+
+Estado 1: **Cambio de Modalidad (SWITCH)**
+Si el gesto es "**MODO_ESCRITURA**" (Rock), invierte el estado booleano *is_writing_mode*.
+
 ```python
 is_writing_mode = not is_writing_mode
 ```
-Estado 2: Edición de Texto Si estamos en modo escritura, el gesto se traduce en la manipulación de la cadena sentence:
-- Caracteres estándar: Se concatenan a la cadena.
-- BACKSPACE: Elimina el último carácter (sentence[:-1]).
-- BORRAR_TODO: Elimina todo lo que se ha escrito.
-- SPACE: Añade un espacio en blanco.
 
-Gestión de Disparador Único: La variable action_just_triggered impide que la acción se repita infinitamente si el usuario no mueve la mano. La acción ocurre una sola vez, y luego el sistema espera a que el gesto cambie o la mano se mueva (evento "Key Up").
+Estado 2: **Edición de Texto** 
+Si estamos en modo escritura, el gesto se traduce en la manipulación de la cadena sentence:
+- **Caracteres estándar**: Se concatenan a la cadena.
+- **BACKSPACE**: Elimina el último carácter (sentence[:-1]).
+- **BORRAR_TODO**: Elimina todo lo que se ha escrito.
+- **SPACE**: Añade un espacio en blanco.
+
+Gestión de **Disparador Único**: La variable *action_just_triggered* impide que la acción se repita infinitamente si el usuario no mueve la mano. La acción ocurre una sola vez, y luego el sistema espera a que el gesto cambie o la mano se mueva (evento "Key Up").
 
 #### Robustez y Gestión de Errores (Fault Tolerance)
-Un software nunca debe fallar inesperadamente; por ello, ha sido blindado contra fallos críticos mediante el uso estratégico de bloques try...except.
-•	Carga de Recursos Externos: Al inicio, el script intenta cargar los iconos PNG (mic_blue.png, etc.). Si los archivos faltan (error común al mover el proyecto a otro PC), el código intercepta la excepción y activa la función de respaldo create_dummy_icon, generando recursos gráficos procedimentales sobre la marcha.
+Un **software** nunca debe fallar inesperadamente; por ello, ha sido blindado contra fallos críticos mediante el uso estratégico de bloques try...except.
+
+1. **Carga de Recursos Externos**:
+Al inicio, el script intenta cargar los iconos **PNG** (mic_blue.png, etc.). Si los archivos *faltan* (error común al mover el proyecto a otro PC), el código intercepta la excepción y activa la función de respaldo *create_dummy_icon*, generando recursos gráficos procedimentales sobre la marcha.
+
 ```python
 except Exception as e:
     print(f"⚠️ Error cargando iconos: {e}. Usando fallback.")
     icon_blue = create_dummy_icon(...)
 ```
-•	Pipeline de Reconocimiento: Incluso durante el ciclo principal, el procesamiento de MediaPipe o la predicción del modelo podrían generar errores imprevistos (ej. valores NaN o divisiones por cero en casos límite). Todo el bloque lógico está protegido:
+
+2. **Pipeline de Reconocimiento**:
+Incluso durante el *ciclo principal*, el procesamiento de **MediaPipe** o la predicción del modelo podrían generar errores imprevistos (ej. valores NaN o divisiones por cero en casos límite).  
+ Todo el bloque lógico está protegido:
+
 ```python
 try:
     features = get_normalized_landmarks(hand_landmarks)
@@ -833,7 +900,8 @@ except Exception as e:
     display_text = "Err"
     # El programa continúa ejecutándose en lugar de cerrarse
 ```
-Esto garantiza que un solo frame corrupto no termine la ejecución de la aplicación.
+
+Esto garantiza que un solo **frame corrupto** no termine la ejecución de la aplicación.
 
 ## Stack Tecnológico Utilizado
 El proyecto ha sido desarrollado íntegramente en Python, aprovechando su extenso ecosistema de librerías para Inteligencia Artificial y procesamiento en tiempo real.

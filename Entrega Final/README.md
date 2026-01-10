@@ -353,6 +353,21 @@ img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 3. Reconvierten la imagen procesada al formato BGR de OpenCV para poder mostrarla en vídeo.
 
 Este enfoque híbrido garantiza que la interfaz de usuario sea lingüísticamente correcta sin sacrificar el rendimiento de la pipeline de vídeo.
+Además de la conversión de formatos, la función implementa dos mecanismos de seguridad importantes:
+
+1) Fallback de Tipografía (Portabilidad): El sistema intenta cargar la fuente vectorial arial.ttf para asegurar una estética moderna. Sin embargo, dado que las fuentes disponibles varían según el sistema operativo, se encapsuló la carga en un bloque de manejo de errores. Si el archivo no se encuentra, el sistema carga automáticamente una fuente predeterminada en lugar de detener la ejecución:
+```python
+try:
+    font = ImageFont.truetype("arial.ttf", font_size)
+except IOError:
+    # Mecanismo de seguridad si falta la fuente
+    font = ImageFont.load_default()
+```
+2) Corrección del Espacio de Color: Existe una discrepancia entre cómo las librerías interpretan los colores: OpenCV utiliza el estándar BGR (Blue-Green-Red), mientras que Pillow utiliza RGB. Si pasáramos el color directamente, el texto rojo aparecería azul y viceversa. Por ello, el código realiza una inversión manual de los canales de color antes de dibujar:
+```python
+# Inversión de canales: de BGR (OpenCV) a RGB (Pillow)
+color_rgb = (color[2], color[1], color[0])
+```
 
 **Gestión asíncrona del audio** (*Multithreading*)  
 

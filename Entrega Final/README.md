@@ -42,165 +42,235 @@ En lo que respecta al **diario** de este *proyecto final*, muy a menudo hemos tr
 Por la metodologís de trabajo hemos realizado casi todo el proyecto *juntos* y de *forma presencial*, para que ambos pudiéramos entender bien lo que hacía el otro y porque ante cualquier **problema** o **duda**, en *persona* se consigue resolver casi de inmediato, en lugar de hacerlo por *teléfono*.    
 Las pocas veces en las que no conseguíamos encontrarnos en persona, utilizábamos **videollamadas por WhatsApp** o, cuando uno podía y el otro no, trabajábamos de **forma individual** enviándonos mensajes cada vez que se realizaba alguna modificación o avance.
 
-Progetto: Traduttore di Lingua dei Segni Spagnola (LSE) basato su Computer Vision
-1. Setup dell’Ambiente di Sviluppo
-Per garantire riproducibilità e isolamento delle dipendenze, il progetto è stato sviluppato all’interno di un ambiente virtuale Anaconda.
+Orden cronológico del desarrollo del proyecto
 
-conda create -n progetto_vc python=3.10
-conda activate progetto_vc
+## 1. Configuración del Entorno de Desarrollo
+
+Para garantizar la reproducibilidad y el aislamiento de las dependencias, el proyecto se desarrolló dentro de un entorno virtual **Anaconda**.
+
+```python
+conda create -n proyecto_vc python=3.10
+conda activate proyecto_vc
 pip install mediapipe==0.10.9
 pip install pyttsx3
 pip install pillow
-La versione di Python 3.10 è stata scelta per garantire piena compatibilità con MediaPipe e le librerie di supporto.
+```
 
-2. Dataset: Costruzione e Unione delle Fonti
-Abbiamo utilizzato e unificato due dataset pubblici scaricati da Kaggle:
-* Spanish Sign Language Alphabet Static
-* Lenguaje de Signos Español
-L’obiettivo dell’unione è stato aumentare la varietà delle mani, delle angolazioni e delle condizioni di illuminazione, migliorando la capacità di generalizzazione del modello.
-Durante lo sviluppo ci siamo accorti che alcune lettere (Y, X, W, V, T, H, F) risultavano poco affidabili. Per questo motivo:
-* abbiamo raccolto manualmente nuove immagini tramite webcam (script collect_data.py);
-* abbiamo sostituito progressivamente parte delle immagini dei dataset originali con dati raccolti da noi, più coerenti con l’ambiente reale di utilizzo.
+Se eligió **Python 3.10** para garantizar la compatibilidad completa con **MediaPipe** y las librerías de soporte utilizadas.
 
-3. Pre-processing e Standardizzazione dei Dati (utils.py)
-Il file utils.py rappresenta il cuore matematico del progetto: funge da “traduttore” tra la visione artificiale e il modello di Machine Learning.
-3.1 Obiettivi del Pre-processing
-Il pre-processing è stato progettato per garantire:
-* Invarianza alla traslazione Il gesto deve essere riconosciuto indipendentemente dalla posizione della mano nell’immagine.
-* Invarianza di scala Il gesto deve essere riconosciuto sia con la mano vicina che lontana dalla webcam.
-* Compatibilità con modelli di Machine Learning I dati devono essere trasformati in un vettore numerico adatto a un classificatore.
-3.2 Pipeline di Elaborazione
-La funzione pre_process_landmark applica i seguenti passaggi:
-1. Copia di sicurezza Viene creata una deepcopy dei landmark per evitare di modificare i dati usati per il rendering grafico.
-2. Relativizzazione delle coordinate
-    * Il landmark 0 (polso) viene fissato come origine (0,0).
-    * Tutti gli altri punti vengono espressi come differenza rispetto al polso.
-3. Flattening La lista di coppie (x, y) viene trasformata in un unico vettore monodimensionale.
-4. Normalizzazione Tutti i valori vengono scalati nell’intervallo [-1, 1], migliorando la stabilità numerica e la convergenza del modello.
-Output finale: Un vettore di numeri reali pronto per essere fornito al classificatore.
+## 2. Dataset: Construcción y Unión de las Fuentes
 
-4. Estrazione delle Feature (create_dataset.ipynb)
-Questo notebook ha il compito di trasformare le immagini grezze in dati numerici.
+Se utilizaron y unificaron dos *datasets* públicos descargados de **Kaggle**:
+
+- Spanish Sign Language Alphabet Static
+- Lenguaje de Signos Español
+
+El objetivo de la unión fue aumentar la variedad de manos, ángulos y condiciones de iluminación, mejorando así la capacidad de generalización del modelo.  
+
+Durante el desarrollo se observó que algunas letras **(Y, X, W, V, T, H, F)** resultaban poco fiables. Por este motivo:
+
+- se recopilaron manualmente nuevas imágenes mediante webcam con el script **collect_data.py**
+- se **sustituyó progresivamente** parte de las *imágenes* de los datasets originales por datos recogidos por nosotros, más coherentes con el entorno real de uso
+
+## 3. Pre-procesamiento y Estandarización de los Datos con utils.py
+
+El archivo **utils.py** representa el núcleo matemático del proyecto: actúa como “traductor” entre la visión artificial y el modelo de Machine Learning.
+
+3.1 **Objetivos del Pre-procesamiento**
+El pre-procesamiento fue diseñado para garantizar:
+
+- **Invariancia a la traslación**
+El gesto debe ser reconocido independientemente de la posición de la mano en la imagen.
+
+- **Invariancia de escala**
+El gesto debe ser reconocido tanto con la mano cerca como lejos de la cámara.
+
+- **Compatibilidad con modelos de Machine Learning**
+Los datos deben transformarse en un vector numérico adecuado para un clasificador.
+
+3.2 **Pipeline de Procesamiento**
+
+La función pre_process_landmark aplica los siguientes pasos:
+
+1. **Copia de seguridad**
+Se crea una deepcopy de los landmarks para evitar modificar los datos utilizados para el renderizado gráfico.
+
+2. **Relativización de las coordenadas**
+
+El *landmark* 0 (muñeca) se fija como origen (0,0).
+Todos los demás *puntos* se expresan como diferencia respecto a la muñeca.
+
+3. **Flattening**
+La lista de pares (x, y) se transforma en un único vector unidimensional.
+
+4. **Normalización**
+Todos los valores se escalan en el intervalo **[-1, 1]**, mejorando la estabilidad numérica y la convergencia del modelo.
+
+**Output final**:  
+Un vector de números reales listo para ser proporcionado al clasificador.
+
+## 4. Extracción de Features con create_dataset.ipynb
+
+Este notebook se encarga de transformar las **imágenes** en **datos numéricos**.
+
 Pipeline:
-1. Caricamento delle immagini organizzate per classe (A, B, C, …).
-2. Rilevamento dei 21 landmark della mano tramite MediaPipe Hands.
-3. Applicazione del pre-processing definito in utils.py.
-4. Salvataggio dei dati in formato numerico.
-Risultato: un dataset strutturato e pronto per l’addestramento.
+- Carga de las imágenes organizadas por clase (A, B, C, …).
+- Detección de los 21 landmarks de la mano mediante MediaPipe Hands.
+- Aplicación del pre-procesamiento definido en utils.py.
+- Guardado de los datos en formato numérico.
 
-5. Addestramento del Modello (train_classifier.ipynb)
-5.1 Scelte di Progetto
-È stato utilizzato un Random Forest Classifier perché:
-* è robusto al rumore;
-* non richiede feature engineering complesso;
-* funziona bene con dataset di dimensioni medio-piccole.
-5.2 Fasi di Training
-* Suddivisione dei dati:
-    * 80% Training Set
-    * 20% Test Set
-* Addestramento del modello
-* Valutazione tramite accuracy score
-Se l’accuratezza supera il 95%, il modello viene esportato come file statico:
+**Resultado**: un dataset estructurado y listo para el entrenamiento.
 
-model.p
-Questo file rappresenta il “cervello” dell’applicazione finale.
+## 5. Entrenamiento del Modelo (train_classifier.ipynb)
 
-6. Applicazione in Tempo Reale (inference_classifier.py)
-Questo è il file esecutivo, quello che l’utente finale utilizza.
-6.1 Funzionalità Principali
-* Acquisizione video dalla webcam
-* Rilevamento della mano
-* Conversione dei dati visivi in dati matematici
-* Predizione del segno
-* Interfaccia grafica aumentata
-6.2 Pipeline Logica
-Fase A – Setup
-* Caricamento del modello model.p (se presente).
-* Modalità fallback se il modello non è disponibile.
-Fase B – Detection
-* MediaPipe individua i 21 landmark.
-* Disegno dello scheletro della mano a schermo.
-Fase C – Ponte Visione → AI
-* Conversione coordinate normalizzate → pixel.
-* Pre-processing tramite utils.py.
-Fase D – Inference
-* Predizione numerica del modello.
-* Traduzione numero → lettera tramite dizionario.
-Output visivo:
-* Webcam live
-* Bounding box della mano
-* Lettera riconosciuta
+5.1 **Elecciones de Proyecto**
 
-7. Problema Critico: Distinzione tra T e F (Profondità)
-Le lettere T e F risultano quasi indistinguibili in 2D (effetto “ombra cinese”).
-7.1 Analisi del Problema
-* In una webcam 2D le coordinate (x, y) sono quasi identiche.
-* Aggiungere immagini al dataset portava a overfitting.
-7.2 Soluzione Algoritmica
-Abbiamo sfruttato la coordinata Z stimata da MediaPipe:
-* Calcolo della differenza di profondità tra:
-    * punta dell’indice
-    * punta del pollice
-Regola:
-* indice più vicino alla camera → F
-* indice allineato o dietro → T
-7.3 Calibrazione Sperimentale
-* F: valori fino a -0.036
-* T: valori ~ -0.024
-* Soglia finale: -0.028
-Risultato: distinzione stabile e riproducibile senza riaddestrare il modello.
+Se utilizó un **Random Forest Classifier** porque:
 
-8. Modalità Scrittura e Gestione dei Comandi
-Abbiamo introdotto segni speciali per:
-1. Entrare / uscire dalla modalità scrittura
-2. Inserire spazi
-3. Cancellare tutto
-4. Cancellare ultimo carattere
-5. Inserire il punto interrogativo
-Questo trasforma il riconoscitore in un vero sistema di scrittura gestuale.
+- es robusto frente al ruido;
+- no requiere feature engineering complejo;
+- funciona bien con datasets de tamaño medio-pequeño.
 
-9. Text-to-Speech (Accessibilità)
-Per rendere il sistema realmente utile a persone con difficoltà vocali, abbiamo integrato la sintesi vocale.
-* Libreria: pyttsx3 (offline)
-* Voce: spagnola (ricerca automatica nel sistema)
-* Attivazione: uscita dalla modalità scrittura
-Quando l’utente termina la frase, il sistema legge ad alta voce il testo prodotto.
+5.2 **Fases de Entrenamiento**
 
-10. Supporto Unicode (Ñ, ¿)
-OpenCV non supporta correttamente caratteri Unicode. Abbiamo quindi integrato Pillow per il rendering del testo:
-* Supporto completo a:
-    * Ñ
-    * ¿
-* Font reali (Arial)
-* Testo pulito e leggibile
+- División de los datos:
+  - 80% Training Set
+  - 20% Test Set
 
-11. Suggeritore Predittivo (NLP Lite)
-Abbiamo implementato un sistema di suggerimento lessicale:
-* Dizionario interno con ~100 parole spagnole frequenti
-* Analisi dell’ultima parola in tempo reale
-* Visualizzazione di suggerimenti dinamici
-Interazione Touchless
-I suggerimenti sono cliccabili senza mouse:
-* Hover con l’indice
-* Barra di caricamento temporale
-* Selezione automatica
+- Entrenamiento del modelo
+- Evaluación mediante **accuracy score**
 
-12. Interfaccia Grafica: Icona del Microfono
-Abbiamo aggiunto un feedback visivo tramite icone PNG con trasparenza:
-* mic_blue.png → stato idle
-* mic_yellow.png → hover
-* mic_green.png → parlato
-Se le icone non sono presenti, il sistema usa un fallback grafico, evitando crash.
+Si la precisión supera el **95%**, el modelo se exporta como archivo estático:  
+***model.p***
 
-13. Risultato Finale
-Il progetto integra:
-* Computer Vision
-* Machine Learning
-* Sintesi vocale
-* NLP
-* Interfaccia touchless
-Non si tratta solo di “usare una libreria”, ma di progettare un sistema completo, robusto e orientato all’accessibilità.
+Este archivo representa el **“cerebro”** de la aplicación final.
 
+## 6. Aplicación en Tiempo Real con inference_classifier.py
+
+Este es el **archivo ejecutable**, el que utiliza el usuario final.
+
+6.1 **Funcionalidades Principales**
+
+- Adquisición de vídeo desde la webcam
+- Detección de la mano
+- Conversión de los datos visuales a datos matemáticos
+- Predicción del signo
+- Interfaz gráfica aumentada
+
+6.2 **Pipeline Lógica**
+
+Fase A – **Setup**
+
+- Carga del modelo **model.p**
+- Modo fallback si el modelo no está presente.
+
+Fase B – **Detection**
+
+- **MediaPipe** identifica los *21 landmarks*.
+- Dibujo del esqueleto de la mano en pantalla.
+
+Fase C – **Puente Visión → AI**
+
+- Conversión de coordenadas normalizadas a píxeles.
+- Pre-procesamiento mediante **utils.py**.
+
+Fase D – **Inference**
+
+- Predicción numérica del modelo.
+- Traducción número → letra mediante un diccionario.
+
+**Output visual**:
+
+- Webcam en tiempo real
+- Bounding box de la mano
+- Letra reconocida
+
+## 7. Problema Crítico: Distinción entre T y F (Profundidad)
+
+Las letras **T y F** resultan casi indistinguibles en **2D**.
+
+7.1 **Análisis del Problema**
+
+En una webcam 2D las coordenadas (x, y) son casi idénticas dobemos añadir imágenes al dataset provocaba overfitting
+
+7.2 **Solución Algorítmica**
+
+Se aprovechó la **coordenada Z** estimada por MediaPipe:
+
+Cálculo de la diferencia de profundidad entre:
+
+- la punta del índice
+- la punta del pulgar
+
+Regla:
+
+- índice más cercano a la cámara → F
+- índice alineado o detrás del pulgar → T
+
+7.3 **Calibración Experimental**
+
+**F**: valores hasta -0.036  
+**T**: valores alrededor de -0.024  
+**Umbral final**: -0.028
+
+**Resultado**: distinción estable y reproducible sin necesidad de reentrenar el modelo.
+
+# 8. Modo Escritura y Gestión de Comandos
+
+Se introdujeron gestos especiales para:
+
+- **Entrar** / **salir** del modo escritura
+- Insertar **espacios**
+- Borrar **todo**
+- Borrar el **último carácter**
+- Insertar el **signo de interrogación**  
+Esto transforma el reconocedor en un **verdadero sistema de escritura gestual**.
+
+# 9. Text-to-Speech (Accesibilidad)
+
+Para que el sistema sea realmente útil a personas con dificultades vocales, se integró la **síntesis de voz**.
+
+- **Librería**: pyttsx3 (offline)
+- **Voz**: española (búsqueda automática en el sistema)
+- **Activación**: salida del modo escritura
+
+Cuando el usuario termina la frase, el sistema éélee en voz altaéé el texto generado.
+
+## 10. Soporte Unicode (Ñ, ¿)
+
+**OpenCV** no soporta correctamente caracteres Unicode.
+Por ello se integró **Pillow** para el renderizado del texto:
+
+- Soporte completo para:
+  - **Ñ**
+  - **¿**
+- Uso de fuentes reales **(Arial)**
+- Texto limpio y legible
+
+## 11. Sugeridor Predictivo (NLP Lite)
+
+Se implementó un sistema de **sugerencia léxica**:
+
+- Diccionario interno con **~100 palabras** *frecuentes* en español
+- Análisis de la última palabra en tiempo real
+- Visualización de sugerencias dinámicas
+
+**Interacción Touchless**
+Las sugerencias son seleccionables sin ratón:
+
+- Hover con el índice
+- Barra de carga temporal
+- Selección automática
+
+## 12. Interfaz Gráfica: Icono del Micrófono
+
+Se añadió feedback visual mediante iconos **PNG** con transparencia:
+
+- mic_blue.png → estado idle
+- mic_yellow.png → hover
+- mic_green.png → hablado
+
+Si los iconos no están presentes, el sistema utiliza un **fallback gráfico**, evitando fallos de ejecución.
 
 
 ## Estructura del proyecto

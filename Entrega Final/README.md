@@ -313,9 +313,9 @@ Para superar los **límites nativos** de las librerías individuales (como la fa
 
 Uno de los retos al desarrollar interfaces modernas con **OpenCV** es la gestión de la *transparencia*. **OpenCV** gestiona las imágenes como matrices de píxeles *BGR (Blue-Green-Red)* opacos. Para visualizar iconos modernos *(como el micrófono)* con bordes suaves y fondos transparentes, se implementó la función overlay_transparent.
 
-Esta función ejecuta una operación matemática conocida como **Alpha Blending**. En lugar de sobrescribir brutalmente los píxeles del vídeo con los del icono (lo que resultaría en un rectángulo negro alrededor de la imagen), el código calcula una media ponderada para cada píxel.
+Esta función ejecuta una operación matemática conocida como Alpha Blending. En lugar de sobrescribir directamente los píxeles del vídeo con los del icono (lo que resultaría en un antiestético rectángulo negro alrededor de la imagen), el código calcula una media ponderada para cada píxel basándose en su nivel de transparencia.
 
-Analizando el código, vemos primero la separación de canales:
+Analizando el código, vemos primero la separación y normalización de los canales:
 
 ```python
 # Separa los canales: BGR (color) y Alpha (transparencia)
@@ -323,14 +323,12 @@ overlay_img = overlay_resized[:, :, :3]
 overlay_mask = overlay_resized[:, :, 3:] / 255.0
 ```
 
-Posteriormente se calcula la máscara inversa para el fondo:
-
+Posteriormente, se calcula la máscara inversa para el fondo (donde el icono es transparente, el fondo debe verse):
 ```python
 background_mask = 1.0 - overlay_mask
 ```
 
-Finalmente, ocurre la fusión matricial propiamente dicha:
-
+Finalmente, ocurre la fusión matricial mediante álgebra lineal con NumPy:
 ```python
 # Fusiona las imágenes: (Color del icono * Alpha) + (Fondo * (1 - Alpha))
 blended_roi = (overlay_img * overlay_mask + roi * background_mask).astype(np.uint8)

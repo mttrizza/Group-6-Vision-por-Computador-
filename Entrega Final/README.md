@@ -297,14 +297,17 @@ Progetto_VC/
 
 **Objetivo del módulo**
 El archivo **utils.py** contiene la *lógica matemática de transformación de los datos*. Su función principal, *get_normalized_landmarks*, actúa como un filtro intermedio entre la extracción en bruto de *+MediaPipe** y la entrada del clasificador.  
+
 El *objetivo* es hacer que los datos sean agnósticos respecto a la posición y a la distancia de la **mano**, garantizando que el modelo aprenda la forma del gesto y no su posición en el espacio.
 
 **Funcionamiento técnico**  
 La función recibe como entrada el objeto **hand_landmarks** de MediaPipe y aplica una pipeline de transformación en tres fases:
 
 **1. Conversión a coordenadas relativas (invarianza a la traslación)**  
-Los datos en bruto de MediaPipe son coordenadas absolutas (x, y) normalizadas respecto a las dimensiones de la imagen (0.0 - 1.0).   
+Los datos en bruto de MediaPipe son coordenadas absolutas (x, y) normalizadas respecto a las dimensiones de la imagen (0.0 - 1.0).  
+
 Si usáramos estos **datos** directamente, el modelo aprendería que una mano en la **esquina superior izquierda** es diferente de una mano en la **esquina inferior derecha**, aunque hagan el mismo gesto.  
+
 Para resolver este problema, el código establece la muñeca (*Landmark 0*) como origen (*0, 0*) del sistema cartesiano local.  
 Resta las coordenadas de la muñeca a todos los demás puntos:
 
@@ -333,7 +336,9 @@ temp_landmark_list = list(itertools.chain.from_iterable(temp_landmark_list))
 
 **3. Normalización de escala (invarianza a la escala)**
 La **mano** puede estar cerca de la cámara (coordenadas grandes) o lejos (coordenadas pequeñas).  
+
 Para hacer que el gesto sea reconocible independientemente de la distancia, los valores se normalizan dividiendo todo por el **valor absoluto máximo** presente en el vector.  
+
 Esto fuerza a que todos los datos queden dentro de un rango entre **− 1** y **1**.
 
 Normalizza tra **-1 y 1**
@@ -419,7 +424,7 @@ f.close()
 ### train_classifier.ipynb
 
 **Objetivo del notebook**  
-En este script ocurre la **transición** desde los datos geométricos (las coordenadas de los landmark extraídas en el paso anterior, create_database.ipynb) hasta la creación de un modelo de decisión capaz de clasificar nuevas entradas en tiempo real.
+En este script ocurre la **transición** desde los datos geométricos (las coordenadas de los landmark extraídas en el paso anterior, create_database.ipynb) hasta la creación de un modelo de decisión capaz de clasificar nuevas entradas en tiempo real.  
 
 El objetivo es entrenar un algoritmo de Aprendizaje Supervisado para que aprenda a asociar patrones específicos de coordenadas (features) con las letras correspondientes (label).
 
@@ -428,25 +433,31 @@ El objetivo es entrenar un algoritmo de Aprendizaje Supervisado para que aprenda
 - *Pickle & NumPy*: para gestión eficiente de datos serializados y operaciones matriciales.
 
 **Análisis del flujo (detalle técnico)**  
-Celdas 1 & 2 – **Carga y preparación de datos**
+
+Celdas 1 & 2 – **Carga y preparación de datos**  
+
 El notebook comienza cargando el archivo **dataset.pickle** generado en la fase anterior. Las listas Python se convierten inmediatamente en **NumPy Arrays**, optimizados para cálculos vectoriales requeridos por los algoritmos de Scikit-learn, ofreciendo prestaciones superiores respecto a listas estándar.
 
-Celda 3 – **Data Splitting y entrenamiento** (el core)
+Celda 3 – **Data Splitting y entrenamiento** (el core)  
+
 Esta celda ejecuta tres operaciones críticas para la validez científica del proyecto:
 
 1. **Partitioning** (Train/Test Split): el dataset se divide en dos subconjuntos disjuntos:
 
-**Training Set** *(80%)*: usado por el modelo para aprender las reglas.
-**Test Set** *(20%)*: usado para evaluar el rendimiento en datos “nunca vistos antes”.
+**Training Set** *(80%)*: usado por el modelo para aprender las reglas
+**Test Set** *(20%)*: usado para evaluar el rendimiento en datos “nunca vistos antes”
 
 ```python
 x_train, x_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, shuffle=True, stratify=labels)
 ```
 
-2. **Selección del modelo:** se eligió *Random Forest Classifier*.  
-*Motivación:* es un método *“Ensemble”* que construye una multitud de árboles de decisión. Es especialmente adecuado para este proyecto porque gestiona bien datasets con muchas features *(42 coordenadas en total)* y es robusto frente al overfitting (el riesgo de aprender “de memoria” en lugar de generalizar).
+2. **Selección del modelo:** se eligió *Random Forest Classifier*
+     
+**Motivación**: es un método *“Ensemble”* que construye una multitud de árboles de decisión.  
 
-3. **Evaluación (Accuracy)**: después del entrenamiento (.fit), el modelo genera predicciones sobre el Test Set. La exactitud (accuracy_score) nos proporciona una métrica porcentual fiable sobre la capacidad del modelo para generalizar.
+Es especialmente adecuado para este proyecto porque gestiona bien datasets con muchas features *(42 coordenadas en total)* y es robusto frente al overfitting (el riesgo de aprender “de memoria” en lugar de generalizar).
+
+4. **Evaluación (Accuracy)**: después del entrenamiento (.fit), el modelo genera predicciones sobre el Test Set. La exactitud (accuracy_score) nos proporciona una métrica porcentual fiable sobre la capacidad del modelo para generalizar.
 
 ```python
 model = RandomForestClassifier()
@@ -458,8 +469,10 @@ score = accuracy_score(y_predict, y_test)
 ```
 Exactitud del modelo: 99.26%.
 
-Celda 4 – **Serialización del modelo**
-Una vez verificada una exactitud satisfactoria *(típicamente > 95%)*, el **modelo entrenado** se guarda en el archivo **model.p**.  
+Celda 4 – **Serialización del modelo**  
+
+Una vez verificada una exactitud satisfactoria *(típicamente > 95%)*, el **modelo entrenado** se guarda en el archivo **model.p**.   
+
 Este archivo contiene el objeto completo **Random Forest** (con todos sus árboles de decisión y los umbrales matemáticos calculados) y será el único archivo necesario para el script de inferencia en tiempo real (inference_classifier.py).
 
 ```python
@@ -478,13 +491,18 @@ Durante las fases preliminares del proyecto, se intentó el entrenamiento utiliz
 
 2. **Incompletitud de las clases:** no fue posible encontrar un dataset externo que cubriera perfectamente todas las clases deseadas.
 
-Para *resolver estas problemáticas* sin tener que anotar manualmente miles de imágenes, se desarrolló el script **collect_data.py**. Esta herramienta permite integrar el dataset existente con imágenes adquiridas directamente en el entorno de uso final, mejorando drásticamente la robustez del modelo.
+Para *resolver estas problemáticas* sin tener que anotar manualmente miles de imágenes, se desarrolló el script **collect_data.py**.  
 
-**Funcionamiento técnico**
-El script implementa un sistema de **adquisición on-demand**. A diferencia de una grabación de vídeo continua, este enfoque permite al usuario posicionar la mano correctamente y guardar el *frame* solo cuando el gesto es perfecto, garantizando calidad del dato de entrada.  
+Esta herramienta permite integrar el dataset existente con imágenes adquiridas directamente en el entorno de uso final, mejorando drásticamente la robustez del modelo.
+
+**Funcionamiento técnico**  
+
+El script implementa un sistema de **adquisición on-demand**.  
+A diferencia de una grabación de vídeo continua, este enfoque permite al usuario posicionar la mano correctamente y guardar el *frame* solo cuando el gesto es perfecto, garantizando calidad del dato de entrada.  
 El funcionamiento se basa en tres bloques lógicos:
 
 1. **Setup de la cámara** (alta resolución)
+
 Se inicializa la webcam con una resolución **HD (1280x720)**.  
 Usar una resolución más alta en esta fase es crucial para garantizar que MediaPipe (en el siguiente paso) reciba suficientes detalles para extraer los landmark con precisión.
 
@@ -494,8 +512,9 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 ```
 
-2. **Gestión dinámica de clases** (File System)
-El código no requiere pre-crear las carpetas manualmente. Usando la librería os, el script verifica la entrada del teclado y gestiona automáticamente la estructura de directorios. Si el usuario pulsa la tecla "A", el script comprueba la existencia de la carpeta ./data/raw/A, la crea si es necesario, y calcula el nombre progresivo del archivo para evitar sobrescrituras.
+2. **Gestión dinámica de clases** (File System)  
+El código no requiere pre-crear las carpetas manualmente. Usando la librería os, el script verifica la entrada del teclado y gestiona automáticamente la estructura de directorios.  
+Si el usuario pulsa la tecla "**A**", el script comprueba la existencia de la carpeta **./data/raw/A**, la crea si es necesario, y calcula el nombre progresivo del archivo para evitar sobrescrituras.
 
 ```python
 # Convertimos el código de la tecla en letra (ej. 97 -> 'a' -> 'A')

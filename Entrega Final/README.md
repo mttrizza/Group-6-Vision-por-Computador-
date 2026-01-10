@@ -99,13 +99,12 @@ Los datos en bruto de MediaPipe son coordenadas absolutas (x, y) normalizadas re
 ```python
 P'{i} = P{i} - P_{polso}
 ```
-Trova le coordinate del polso (punto 0) per usarle come origine
+Encuentre las coordenadas de la muñeca (punto 0) para utilizarlas como origen.
 ```python
 if index == 0:
     base_x, base_y = landmark_point[0], landmark_point[1]
 ```
-
-Sottrai la base a tutti i punti (Traslazione dell'origine)
+Resta la base a todos los puntos (traslación del origen)
 ```python
 temp_landmark_list[index][0] = temp_landmark_list[index][0] - base_x
 temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y

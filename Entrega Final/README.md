@@ -757,26 +757,31 @@ if max_prob < MIN_CONFIDENCE:
 ```
 Esto evita que el sistema escriba caracteres aleatorios cuando la mano está en transición o en una posición ambigua, lo que reduce drásticamente el «ruido» de fondo.
 
-#### Correzione problemi
-I modelli basati solo su immagini 2D spesso confondono gesti simili. Per risolvere questo problema, nel codice sono stati iniettati dei correttori logici basati sulla geometria 3D e sul tempo.
+#### Corrección de Errores y Post-Procesamiento
+Los modelos basados únicamente en imágenes 2D suelen confundir gestos similares. Para resolver este problema, se han inyectado en el código correctores lógicos basados en la geometría 3D y en el análisis temporal.
 
-A. Correzione Geometrica 3D (T vs F) Le lettere 'T' e 'F' nella lingua dei segni sono molto simili, ma differiscono nella profondità (quale dito sta davanti). MediaPipe fornisce la coordinata Z (profondità). Il codice calcola la distanza relativa sull'asse Z tra la punta del pollice e quella dell'indice:
+A. Corrección Geométrica 3D (Distinción T vs F) Las letras 'T' y 'F' en el lenguaje de señas son muy similares visualmente, pero difieren en la profundidad (qué dedo está delante del otro). MediaPipe proporciona la coordenada Z (profundidad relativa). El código calcula la distancia relativa en el eje Z entre la punta del pulgar y la del índice:
 ```python
 diff_z = index_tip_z - thumb_tip_z
-if diff_z < SOGLIA_LIMIT: predicted_character = 'F'
-else: predicted_character = 'T'
+# Si la diferencia de profundidad cruza el umbral...
+if diff_z < UMBRAL_LIMIT:
+    predicted_character = 'F'
+else:
+    predicted_character = 'T'
 ```
-B. Analisi Temporale Dinamica (N vs Ñ) La 'N' e la 'Ñ' hanno la stessa forma della mano, ma la 'Ñ' prevede un movimento ondulatorio laterale. Un classificatore statico non può vedere il movimento. Per risolvere ciò, il sistema mantiene una memoria storica (x_history) delle ultime 20 posizioni del polso.
+B. Análisis Temporal Dinámico (Distinción N vs Ñ) La 'N' y la 'Ñ' tienen la misma forma de mano, pero la 'Ñ' implica un movimiento ondulatorio lateral. Un clasificador estático no puede percibir el movimiento. Para solucionar esto, el sistema mantiene una memoria histórica (x_history) de las últimas 20 posiciones del la muñeca:
 ```python
 x_history.append(wrist_x)
-if len(x_history) > 20: x_history.pop(0)
+if len(x_history) > 20:
+    x_history.pop(0)
 
-# Calcola l'ampiezza del movimento recente
+# Calcula la amplitud del movimiento reciente
 movement = max(x_history) - min(x_history)
-if predicted_character == 'N' and movement > SOGLIA_MOVIMENTO_N:
+if predicted_character == 'N' and movement > UMBRAL_MOVIMIENTO_N:
     predicted_character = 'Ñ'
 ```
-Se il sistema rileva la forma "N" MA c'è oscillazione significativa, "promuove" la predizione a "Ñ".
+Si el sistema detecta la forma "N" PERO existe una oscilación significativa, "asciende" la predicción a "Ñ", convirtiendo un modelo estático en uno capaz de entender dinámicas temporales.
+
 #### Stabilizzazione Temporale (Anti-Flickering)
 Una volta determinata la lettera (es. "A"), non possiamo scriverla subito. I modelli ML "sfarfallano" (es. A-A-B-A-A) centinaia di volte al secondo. Per evitare di scrivere "AAAAA", è stato implementato un Timer di Conferma (CONFIRMATION_TIME = 1.5 secondi).
 Il sistema verifica la stabilità:

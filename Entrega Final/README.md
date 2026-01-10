@@ -369,23 +369,48 @@ except IOError:
 color_rgb = (color[2], color[1], color[0])
 ```
 
-**Gestión asíncrona del audio** (*Multithreading*)  
+**Gestión Asíncrona del Audio y Arquitectura Multihilo** (*Multithreading*)  
 
-La interacción **humano-máquina** requiere feedback inmediato. Sin embargo, la librería de síntesis de voz **pyttsx3** opera en modo bloqueante: cuando se ejecuta el comando **engine.say()**, el procesador espera a que la frase termine antes de pasar a la siguiente instrucción.  
-En un contexto de vídeo, esto causaría el *“congelamiento”* de la webcam durante varios segundos cada vez que el ordenador habla.
+Uno de los desafíos críticos en los sistemas interactivos en tiempo real es la gestión de la latencia. La operación más costosa en términos de tiempo de ejecución no es el reconocimiento de imagen, sino la síntesis vocal.
 
-Para mantener el sistema Real-Time, se introdujo la ejecución concurrente mediante el módulo threading. La función run_voice_thread encapsula la lógica de voz en un proceso paralelo:
+La librería pyttsx3 opera nativamente en modo bloqueante: la función engine.runAndWait() detiene la ejecución del procesador hasta que la frase completa ha sido pronunciada. Si el ordenador debe decir "Hola, ¿cómo estás?", el proceso tarda entre 2 y 3 segundos. En una arquitectura de un solo hilo (Single-Threaded), esto implicaría congelar el flujo de vídeo de la webcam durante ese tiempo, destruyendo la experiencia de usuario.
 
+Para resolver este cuello de botella y mantener el sistema fluido a 30 FPS, se implementó una arquitectura Multihilo (Multithreading) que desacopla el bucle de renderizado (Vídeo) del bucle de procesamiento (Audio).
+1. Orquestación de Hilos (run_voice_thread)
+La función run_voice_thread actúa como el punto de entrada para la ejecución concurrente. En lugar de ejecutar el audio directamente, instancia un Worker Thread:
 ```python
 def run_voice_thread(text):
     t = threading.Thread(target=speak_function, args=(text, VOICE_ID_MANUALE))
     t.start()
 ```
+Desacoplamiento: Al invocar t.start(), el sistema operativo crea un nuevo flujo de ejecución paralelo.
 
-Al lanzar el hilo con **t.start()**, el sistema operativo crea un nuevo hilo de ejecución para la voz.  
-El ciclo principal del vídeo (while True) continúa por tanto girando a 30 FPS sin interrupciones, mientras que en “segundo plano” el motor **TTS (Text-to-Speech)** pronuncia la frase.
+Resultado: El Main Thread (encargado del vídeo y la IA) queda libre inmediatamente para procesar el siguiente frame, mientras que el audio se procesa en segundo plano.
 
----------------------------------------------di di parlare anche della funzione speak_function
+2. Lógica de Configuración Dinámica (speak_function)
+La función speak_function, que se ejecuta dentro del hilo secundario, no se limita a reproducir sonido. Implementa una lógica robusta de autconfiguración y localización para garantizar que el sistema funcione correctamente en diferentes ordenadores.
+
+Analizando el código, vemos tres pasos clave:
+
+A. Selección Automática del Idioma: Dado que el proyecto está diseñado para la Lengua de Signos Española, el sistema no asume una configuración predeterminada. En su lugar, itera sobre los drivers de voz instalados en el sistema operativo buscando explícitamente una voz hispana:
+```python
+voices = engine.getProperty('voices')
+for v in voices:
+    # Búsqueda heurística de drivers en español
+    if "spanish" in v.name.lower() or "esp" in v.name.lower():
+        engine.setProperty('voice', v.id)
+        break
+```
+Este algoritmo de búsqueda garantiza la portabilidad del software: funcionará tanto en un Windows configurado en inglés como en uno en español, siempre que exista un paquete de voz compatible.
+
+B. Configuración de Velocidad: Se ajusta la velocidad de habla (rate) a 140 palabras por minuto para asegurar una dicción clara y natural, adecuada para fines educativos o de asistencia.
+```python
+engine.setProperty('rate', 140)
+```
+C. Tolerancia a Fallos: Toda la lógica de audio está encapsulada en un bloque try...except.
+```python
+except Exception as e: print(f"Errore Audio: {e}")
+```
 
 **El motor NLP (Natural Language Processing)**
 
